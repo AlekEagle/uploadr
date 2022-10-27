@@ -1,5 +1,5 @@
 #pragma once
-#include "clip/clip.h"
+#include <clip.h>
 
 namespace Clipboard {
   void setClipboard(const char *text);

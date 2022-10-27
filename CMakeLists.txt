@@ -24,6 +24,8 @@ set(CLIP_EXAMPLES OFF CACHE BOOL "Compile clip examples")
 set(CLIP_TESTS OFF CACHE BOOL "Compile clip tests")
 set(CLIP_X11_PNG_LIBRARY ${PNG_LIBRARIES})
 add_subdirectory(${LIB_DIR}/clip)
+#### JSONCONS ####
+set(JSONCONS_INCLUDE ${LIB_DIR}/jsoncons/include)
 
 ### EXECUTABLE ###
 add_executable(uploadr ${UPLOADR_SOURCES})
@@ -45,5 +47,6 @@ target_include_directories(
   ${CURL_INCLUDE_DIRS}
   ${X11_INCLUDE_DIRS}
   ${PNG_INCLUDE_DIRS}
-  ${LIB_DIR}
+  ${LIB_DIR}/clip
+  ${JSONCONS_INCLUDE}
 )

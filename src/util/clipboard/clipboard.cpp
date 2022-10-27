@@ -1,5 +1,5 @@
 #include "clipboard.hpp"
-#include "clip/clip.h"
+#include <clip.h>
 
 void Clipboard::setClipboard(const char *text)
 {

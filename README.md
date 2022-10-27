@@ -20,4 +20,3 @@ You can't (yet).
 - [ ] Finish uploadr
 - [ ] Make a PKGBUILD for MPR
 - [ ] Make a PKGBUILD for AUR
-- [ ] Use submodule for jsoncons

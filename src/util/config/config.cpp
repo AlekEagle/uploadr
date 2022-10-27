@@ -29,5 +29,5 @@ bool Config::initConfig() {
   std::ofstream config(CONFIG_FILE);
   // Write the default config to the file
   jsoncons::json configJson = jsoncons::json::object();
-  
+
 }

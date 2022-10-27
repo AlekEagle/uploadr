@@ -1,3 +1,6 @@
 [submodule "clip"]
 	path = lib/clip
 	url = https://github.com/dacap/clip.git
+[submodule "lib/jsoncons"]
+	path = lib/jsoncons
+	url = git@github.com:danielaparker/jsoncons.git
