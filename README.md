@@ -10,3 +10,14 @@ Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprec
 - [libnotify](https://developer.gnome.org/libnotify/)
 - [libpng](http://www.libpng.org/pub/png/libpng.html)
 - [x11-dev](https://www.x.org/wiki/)
+
+## Installation
+
+You can't (yet).
+
+## TODO
+
+- [ ] Finish uploadr
+- [ ] Make a PKGBUILD for MPR
+- [ ] Make a PKGBUILD for AUR
+- [ ] Use submodule for jsoncons
