@@ -12,4 +12,8 @@ int main(int argc, char **argv)
     cout << "Failed to initialize libnotify" << endl;
     return 1;
   }
+
+  // Create a notification
+  NotNotification *notification = new NotNotification("Uploadr", Clipboard::getClipboard().c_str(), "uploadr");
+  notification->show();
 }

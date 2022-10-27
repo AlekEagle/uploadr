@@ -1,6 +1,8 @@
 #pragma once
 #include <clip.h>
+#include <string>
 
 namespace Clipboard {
-  void setClipboard(const char *text);
+  bool setClipboardText(const char *text);
+  std::string getClipboardText();
 }
