@@ -1,34 +1,47 @@
 ### MINIMUM CMAKE VERSION ###
 cmake_minimum_required(VERSION 3.0)
+
 ### C++ STANDARD ###
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 ### PROJECT ###
 project(uploadr)
+
 ### DEPENDENCY RESOLVERS ###
 find_package(PkgConfig REQUIRED)
+
 ### DEPENDENCIES ###
 pkg_check_modules(CURL REQUIRED libcurl)
 pkg_check_modules(CURL REQUIRED libnotify)
 pkg_check_modules(X11 REQUIRED x11)
 pkg_check_modules(PNG REQUIRED libpng)
+
 ### DIRECTORIES ###
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+
 ### SOURCES ###
 file (GLOB_RECURSE UPLOADR_SOURCES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.cpp")
+
 ### LIBRARIES ###
+
 #### CLIP ####
 set(CLIP_EXAMPLES OFF CACHE BOOL "Compile clip examples")
 set(CLIP_TESTS OFF CACHE BOOL "Compile clip tests")
 set(CLIP_X11_PNG_LIBRARY ${PNG_LIBRARIES})
 add_subdirectory(${LIB_DIR}/clip)
+
+#### PUGIXML ####
+add_subdirectory(${LIB_DIR}/pugixml)
+
 #### JSONCONS ####
 set(JSONCONS_INCLUDE ${LIB_DIR}/jsoncons/include)
 
 ### EXECUTABLE ###
 add_executable(uploadr ${UPLOADR_SOURCES})
+
 ### EXECUTABLE LINKING ###
 target_link_libraries(
   uploadr
@@ -38,6 +51,7 @@ target_link_libraries(
   ${X11_LIBRARIES}
   ${PNG_LIBRARIES}
 )
+
 ### EXECUTABLE INCLUDES ###
 target_include_directories(
   uploadr
