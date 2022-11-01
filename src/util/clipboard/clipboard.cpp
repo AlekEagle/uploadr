@@ -14,8 +14,12 @@ std::string Clipboard::getClipboardText()
   if (clip::has(clip::text_format()))
   {
     // Get the text from the clipboard
-    return clip::get_text();
-  } else {
+    std::string text;
+    clip::get_text(text);
+    return text;
+  }
+  else
+  {
     // Return an empty string
     return "";
   }

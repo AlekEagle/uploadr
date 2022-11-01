@@ -3,8 +3,7 @@
 
 bool initNotify(const char *appName);
 
-class NotNotification
-{
+class NotNotification {
   public:
     NotifyNotification *__notification;
 
@@ -14,9 +13,13 @@ class NotNotification
     NotNotification *setTimeout(int timeout);
     NotNotification *setCategory(const char *category);
     NotNotification *setAppName(const char *appname);
-    NotNotification *addAction(const char *action, const char *label, NotifyActionCallback callback, void *user_data);
+    NotNotification *addAction(
+        const char *action, const char *label, NotifyActionCallback callback,
+        void *user_data
+    );
     NotNotification *show();
     NotNotification *close();
-    NotNotification *update(const char *summary, const char *body, const char *icon);
+    NotNotification *
+    update(const char *summary, const char *body, const char *icon);
     gint getClosedReason();
 };
