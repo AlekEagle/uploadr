@@ -22,9 +22,6 @@ class Config {
     // Close and destroy the config class.
     ~Config();
 
-    // Initializes the config directory and files with default values. Returns 0
-    // on success, 1 on failure, and 2 if the config directory already exists.
-    // If force is true, the config directory will be overwritten and will never
-    // return 2.
-    int init(bool force = false);
+    // Returns the config directory path.
+    fs::path getConfigPath();
 };

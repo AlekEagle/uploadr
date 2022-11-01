@@ -6,10 +6,6 @@ class Flags {
   private:
     // A map of flags and their values
     std::map<std::string, std::string> flagMap;
-    // A list of arguments
-    char **arguments;
-    // The number of arguments
-    int argCount;
 
   public:
     // Create a new instance of the flags class.
@@ -17,14 +13,12 @@ class Flags {
     // Close and destroy the flags class.
     ~Flags();
 
+    // A list of arguments
+    std::map<int, std::string> arguments;
     // Returns the value of the specified flag. If the flag does not exist,
     // returns empty string.
     std::string operator[](std::string flag);
     std::string operator[](const char *flag);
-    // Returns the arguments list.
-    char **getArguments();
-    // Returns the number of arguments.
-    int getArgCount();
     // Get the value of a flag as a string.
     std::string getString(std::string flag);
     std::string getString(const char *flag);

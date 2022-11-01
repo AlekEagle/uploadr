@@ -3,7 +3,6 @@
 #include <string>
 
 Flags::Flags(int argc, char **argv) {
-  argCount = 0;
   // Begin parsing the arguments
   /*
   How the arguments should be parsed:
@@ -89,8 +88,7 @@ Flags::Flags(int argc, char **argv) {
       }
     } else {
       // Add the argument to the arguments list
-      arguments[argCount] = argv[i];
-      argCount++;
+      arguments[arguments.size()] = arg;
     }
   }
 }
@@ -114,14 +112,6 @@ std::string Flags::operator[](const char *flag) {
 
   // Use the string version of the operator
   return operator[](flagString);
-}
-
-char **Flags::getArguments() {
-  return arguments;
-}
-
-int Flags::getArgCount() {
-  return argCount;
 }
 
 std::string Flags::getString(std::string flag) {

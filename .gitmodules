@@ -4,3 +4,6 @@
 [submodule "lib/jsoncons"]
 	path = lib/jsoncons
 	url = git@github.com:danielaparker/jsoncons.git
+[submodule "lib/pugixml"]
+	path = lib/pugixml
+	url = git@github.com:zeux/pugixml.git
