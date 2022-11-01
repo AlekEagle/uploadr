@@ -1,58 +1,61 @@
-### MINIMUM CMAKE VERSION ###
+# MINIMUM CMAKE VERSION
 cmake_minimum_required(VERSION 3.0)
 
-### C++ STANDARD ###
+# C++ STANDARD
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-### PROJECT ###
+# PROJECT
 project(uploadr)
 
-### DEPENDENCY RESOLVERS ###
+# DEPENDENCY RESOLVERS
 find_package(PkgConfig REQUIRED)
 
-### DEPENDENCIES ###
+# DEPENDENCIES
 pkg_check_modules(CURL REQUIRED libcurl)
 pkg_check_modules(CURL REQUIRED libnotify)
 pkg_check_modules(X11 REQUIRED x11)
 pkg_check_modules(PNG REQUIRED libpng)
 
-### DIRECTORIES ###
+# DIRECTORIES
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-### SOURCES ###
-file (GLOB_RECURSE UPLOADR_SOURCES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.cpp")
+# SOURCES
+file(GLOB_RECURSE UPLOADR_SOURCES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.cpp")
 
-### LIBRARIES ###
+# LIBRARIES
 
-#### CLIP ####
+# CLIP
 set(CLIP_EXAMPLES OFF CACHE BOOL "Compile clip examples")
 set(CLIP_TESTS OFF CACHE BOOL "Compile clip tests")
 set(CLIP_X11_PNG_LIBRARY ${PNG_LIBRARIES})
 add_subdirectory(${LIB_DIR}/clip)
 
-#### PUGIXML ####
+# PUGIXML
 add_subdirectory(${LIB_DIR}/pugixml)
 
-#### JSONCONS ####
+# JSONCONS
 set(JSONCONS_INCLUDE ${LIB_DIR}/jsoncons/include)
 
-### EXECUTABLE ###
+# END OF LIBRARIES
+
+# EXECUTABLE
 add_executable(uploadr ${UPLOADR_SOURCES})
 
-### EXECUTABLE LINKING ###
+# EXECUTABLE LINKING
 target_link_libraries(
   uploadr
   clip
+  pugixml
   ${NOTIFY_LIBRARIES}
   ${CURL_LIBRARIES}
   ${X11_LIBRARIES}
   ${PNG_LIBRARIES}
 )
 
-### EXECUTABLE INCLUDES ###
+# EXECUTABLE INCLUDES
 target_include_directories(
   uploadr
   PUBLIC
