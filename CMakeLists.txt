@@ -12,8 +12,8 @@ project(uploadr)
 find_package(PkgConfig REQUIRED)
 
 # DEPENDENCIES
-pkg_check_modules(CURL REQUIRED libcurl)
-pkg_check_modules(CURL REQUIRED libnotify)
+pkg_check_modules(CURL REQUIRED curlpp)
+pkg_check_modules(NOTIFY REQUIRED libnotify)
 pkg_check_modules(X11 REQUIRED x11)
 pkg_check_modules(PNG REQUIRED libpng)
 
@@ -66,4 +66,5 @@ target_include_directories(
   ${PNG_INCLUDE_DIRS}
   ${LIB_DIR}/clip
   ${JSONCONS_INCLUDE}
+  ${LIB_DIR}/pugixml/src
 )

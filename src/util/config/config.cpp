@@ -31,6 +31,7 @@ Config::Config(fs::path configPath) {
   this->configPath = configPath;
   if (!fs::exists(configPath)) {
     fs::create_directories(configPath);
+    fs::create_directories(configPath / "uploaders");
 
     std::ofstream configFile((configPath / "config.json").u8string());
     configFile << jsoncons::pretty_print(Config::getDefaultConfig());
