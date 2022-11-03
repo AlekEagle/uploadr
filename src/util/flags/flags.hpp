@@ -34,4 +34,7 @@ class Flags {
     // Get the value of a flag as a boolean.
     bool getBool(std::string flag);
     bool getBool(const char *flag);
+    // Check if a flag exists.
+    bool exists(std::string flag);
+    bool exists(const char *flag);
 };

@@ -20,4 +20,5 @@ You can't (yet).
 - [ ] Finish uploadr
 - [ ] Make a PKGBUILD for MPR
 - [ ] Make a PKGBUILD for AUR (If it's possible to have a PKGBUILD for both MPR and AUR)
-- [ ] Use a config as similar as possible to ShareNix's/ShareX's
+- [x] Include a default uploader (imgur)
+- [ ] Implement custom uploader syntax (similar to ShareX's)

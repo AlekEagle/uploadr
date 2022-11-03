@@ -203,3 +203,21 @@ bool Flags::getBool(const char *flag) {
   // Use the string version of the function
   return getBool(flagString);
 }
+
+bool Flags::exists(std::string flag) {
+  // Check if the flag exists
+  if (flagMap.find(flag) != flagMap.end()) {
+    // Return true
+    return true;
+  } else {
+    // Return false
+    return false;
+  }
+}
+
+bool Flags::exists(const char *flag) {
+  std::string flagString = flag;
+
+  // Use the string version of the function
+  return exists(flagString);
+}
