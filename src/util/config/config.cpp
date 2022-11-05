@@ -16,11 +16,11 @@ namespace Config {
     config["defaultUploader"] = "imgur";
     config["archive"]["enabled"] = true;
     config["archive"]["path"] =
-        (fs::path(getenv("HOME")) / ".local" / "share" / "uploadr" / "archive")
-            .u8string();
+      (fs::path(getenv("HOME")) / ".local" / "share" / "uploadr" / "archive")
+        .u8string();
     config["archive"]["histFile"] = (fs::path(getenv("HOME")) / ".local" /
                                      "share" / "uploadr" / "history.csv")
-                                        .u8string();
+                                      .u8string();
     config["clipboard"]["enabled"] = true;
     config["notification"]["enabled"] = true;
     config["notification"]["timeout"] = 5;
@@ -36,9 +36,9 @@ namespace Config {
     config["request"]["headers"]["Authorization"] = "Client-ID eb13b71463957f7";
     config["request"]["body"]["type"] = "MultipartFormData";
     config["request"]["body"]["fields"]["image"] = "{content}";
-    config["response"]["url"] = "{json:data.link}";
+    config["response"]["url"] = "{json:$.data.link}";
     config["response"]["manageURL"] =
-        "https://imgur.com/delete/{json:data.deletehash}";
+      "https://imgur.com/delete/{json:data.deletehash}";
 
     return config;
   }
@@ -58,10 +58,10 @@ namespace Config {
 
     if (!fs::exists(configPath / "uploaders" / "imgur.uploader")) {
       std::ofstream imgurConfigFile(
-          (configPath / "uploaders" / "imgur.uploader").u8string()
+        (configPath / "uploaders" / "imgur.uploader").u8string()
       );
       imgurConfigFile << jsoncons::pretty_print(
-          MainConfig::getDefaultImgurConfig()
+        MainConfig::getDefaultImgurConfig()
       );
     }
   }
@@ -89,7 +89,7 @@ namespace Config {
 
   UploaderConfig::UploaderConfig(std::string name, MainConfig *mainConfig) {
     this->configPath =
-        mainConfig->getConfigPath() / "uploaders" / (name + ".uploader");
+      mainConfig->getConfigPath() / "uploaders" / (name + ".uploader");
     this->mainConfig = mainConfig;
     if (!fs::exists(this->configPath)) {
       // if the uploader doesn't exist, don't create it like we do with the main
