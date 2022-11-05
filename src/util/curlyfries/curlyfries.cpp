@@ -14,13 +14,24 @@ namespace curlyfries {
     // Set the response stream
     request.setOpt(new cURLpp::Options::WriteStream(&response.body));
     // Set the response headers
-    request.setOpt(new cURLpp::Options::WriteFunction(
+    request.setOpt(new cURLpp::Options::HeaderFunction(
       [&](char *data, size_t size, size_t nmemb) -> size_t {
         std::string header(data, size * nmemb);
-        response.headers.push_back(header);
+        size_t colon = header.find(':');
+        if (colon != std::string::npos) {
+          std::string key = header.substr(0, colon);
+          std::string value = header.substr(colon + 1);
+          response.headers[key] = value;
+        } else {
+          response.headers[header] = "";
+        }
         return size * nmemb;
       }
     ));
+    // Follow redirects
+    request.setOpt(new cURLpp::Options::FollowLocation(true));
+    // Follow a maximum of 10 redirects
+    request.setOpt(new cURLpp::Options::MaxRedirs(10));
   }
 
   CurlyFry::CurlyFry(std::string url, std::string method) : CurlyFry() {
@@ -145,10 +156,16 @@ namespace curlyfries {
     request.setOpt(new cURLpp::Options::HttpHeader(reqHeaders));
     // Send the request
     request.perform();
+    // After the request is done, set the response ready flag to true
+    response.ready = true;
+    // Get the final redirect URL (if any)
+    response.redirectedUrl = cURLpp::infos::EffectiveUrl::get(request);
     // Get the response code
     int rC = cURLpp::infos::ResponseCode::get(request);
     // Set the response code in the our class
     this->response.status = rC;
+    // Return the response code
+    return rC;
   }
 
   Response *CurlyFry::getResponse() {

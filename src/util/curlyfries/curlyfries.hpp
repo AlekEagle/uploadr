@@ -5,15 +5,18 @@
 #include <iostream>
 #include <jsoncons/json.hpp>
 #include <list>
+#include <map>
 #include <pugixml.hpp>
 #include <sstream>
 #include <string>
 
 namespace curlyfries {
   struct Response {
+      bool ready = false;
       std::ostringstream body;
       int status;
-      std::list<std::string> headers;
+      std::map<std::string, std::string> headers;
+      std::string redirectedUrl;
   };
 
   class CurlyFry {

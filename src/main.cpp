@@ -1,6 +1,7 @@
 #include "util/config/config.hpp"
 #include "util/curlyfries/curlyfries.hpp"
 #include "util/flags/flags.hpp"
+#include "util/syntactic/syntactic.hpp"
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
@@ -83,6 +84,13 @@ int main(int argc, char **argv) {
     curlyFry->setUrl(uploader->get("request")["url"].as_string());
     curlyFry->setMethod(uploader->get("request")["method"].as_string());
 
+    // Create a new syntactic object
+    Syntactic::Data data;
+    data.fileName = filePath.filename().string();
+    data.filePath = filePath.string();
+    data.response = curlyFry->getResponse();
+    Syntactic::Syntactic syntactic(data);
+
     // Now we need to determine what body to send
     // The request.body.type field determines what type of body to send
     // It can be one of the following:
@@ -117,9 +125,9 @@ int main(int argc, char **argv) {
               new cURLpp::FormParts::File(field.key(), filePath.string())
             );
           } else {
-            // Add the field to the multipart form data
+            // Parse the field value and add it to the multipart form data
             multipartFormData.push_back(new cURLpp::FormParts::Content(
-              field.key(), field.value().as_string()
+              field.key(), syntactic.parse(field.value().as_string())
             ));
           }
         }

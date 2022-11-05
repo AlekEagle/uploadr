@@ -36,8 +36,8 @@ add_subdirectory(${LIB_DIR}/clip)
 # PUGIXML
 add_subdirectory(${LIB_DIR}/pugixml)
 
-# JSONCONS
-set(JSONCONS_INCLUDE ${LIB_DIR}/jsoncons/include)
+# CPP-BASE64
+add_library(cpp-base64 STATIC ${LIB_DIR}/cpp-base64/base64.cpp)
 
 # END OF LIBRARIES
 
@@ -49,6 +49,7 @@ target_link_libraries(
   uploadr
   clip
   pugixml
+  cpp-base64
   ${NOTIFY_LIBRARIES}
   ${CURL_LIBRARIES}
   ${X11_LIBRARIES}
@@ -65,6 +66,7 @@ target_include_directories(
   ${X11_INCLUDE_DIRS}
   ${PNG_INCLUDE_DIRS}
   ${LIB_DIR}/clip
-  ${JSONCONS_INCLUDE}
+  ${LIB_DIR}/jsoncons/include
   ${LIB_DIR}/pugixml/src
+  ${LIB_DIR}/cpp-base64
 )
