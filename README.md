@@ -25,7 +25,7 @@ sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev
 ```bash
 sudo pacman -S curl jsoncpp libnotify libpng xorgproto cmake make git
 # libcurlpp is not available in the official repos, so you'll have to get it from the AUR
-# using your favorite AUR helper
+# using your favorite AUR helper (e.g. paru -S libcurlpp)
 ```
 
 ```bash
