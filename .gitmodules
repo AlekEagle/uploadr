@@ -1,12 +1,12 @@
-[submodule "clip"]
+[submodule "lib/clip"]
 	path = lib/clip
 	url = https://github.com/dacap/clip.git
 [submodule "lib/jsoncons"]
 	path = lib/jsoncons
-	url = git@github.com:danielaparker/jsoncons.git
+	url = https://github.com/danielaparker/jsoncons.git
 [submodule "lib/pugixml"]
 	path = lib/pugixml
-	url = git@github.com:zeux/pugixml.git
+	url = https://github.com/zeux/pugixml.git
 [submodule "lib/cpp-base64"]
 	path = lib/cpp-base64
-	url = git@github.com:ReneNyffenegger/cpp-base64.git
+	url = https://github.com/ReneNyffenegger/cpp-base64.git

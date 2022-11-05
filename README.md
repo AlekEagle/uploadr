@@ -17,13 +17,15 @@ Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprec
 ### Debian/Ubuntu based distros
 
 ```bash
-sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev libpng-dev libx11-dev cmake build-essential
+sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev libpng-dev libx11-dev cmake build-essential git
 ```
 
 ### Arch Linux
 
 ```bash
-sudo pacman -S curlpp curl jsoncpp libnotify libpng xorgproto cmake make
+sudo pacman -S curl jsoncpp libnotify libpng xorgproto cmake make git
+# libcurlpp is not available in the official repos, so you'll have to get it from the AUR
+# using your favorite AUR helper
 ```
 
 ```bash
@@ -47,4 +49,4 @@ You can't (yet).
 - [ ] Make a PKGBUILD for MPR
 - [ ] Make a PKGBUILD for AUR (If it's possible to have a PKGBUILD for both MPR and AUR)
 - [x] Include a default uploader (imgur)
-- [ ] Implement custom uploader syntax (similar to ShareX's)
+- [x] Implement custom uploader syntax (similar to ShareX's)
