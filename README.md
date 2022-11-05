@@ -17,13 +17,13 @@ Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprec
 ### Debian/Ubuntu based distros
 
 ```bash
-sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev libpng-dev libx11-dev cmake
+sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev libpng-dev libx11-dev cmake build-essential
 ```
 
 ### Arch Linux
 
 ```bash
-sudo pacman -S curlpp curl jsoncpp libnotify libpng xorgproto cmake
+sudo pacman -S curlpp curl jsoncpp libnotify libpng xorgproto cmake make
 ```
 
 ```bash
