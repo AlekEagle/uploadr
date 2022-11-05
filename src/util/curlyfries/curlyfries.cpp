@@ -12,14 +12,18 @@ namespace curlyfries {
     // Initialize curlpp
     cURLpp::initialize();
     // Set the response stream
-    request.setOpt(new cURLpp::Options::WriteStream(&response));
+    request.setOpt(new cURLpp::Options::WriteStream(&response.body));
+    // Set the response headers
+    request.setOpt(new cURLpp::Options::WriteFunction(
+      [&](char *data, size_t size, size_t nmemb) -> size_t {
+        std::string header(data, size * nmemb);
+        response.headers.push_back(header);
+        return size * nmemb;
+      }
+    ));
   }
 
-  CurlyFry::CurlyFry(std::string url, std::string method) {
-    // Initialize curlpp
-    cURLpp::initialize();
-    // Set the response stream
-    request.setOpt(new cURLpp::Options::WriteStream(&response));
+  CurlyFry::CurlyFry(std::string url, std::string method) : CurlyFry() {
     // Set the request URL
     request.setOpt(new cURLpp::Options::Url(url));
     // Set the request method
@@ -36,29 +40,29 @@ namespace curlyfries {
   }
 
   void CurlyFry::addHeader(std::string header) {
-    // Add the header to the headers list
-    headers.push_back(header);
+    // Add the header to the reqHeaders list
+    reqHeaders.push_back(header);
   }
 
   void CurlyFry::addHeader(std::string key, std::string value) {
-    // Add the header to the headers list
-    headers.push_back(key + ": " + value);
+    // Add the header to the reqHeaders list
+    reqHeaders.push_back(key + ": " + value);
   }
 
   void CurlyFry::addHeader(std::string key, std::list<std::string> values) {
-    // Add the header to the headers list
+    // Add the header to the reqHeaders list
     std::string header = key + ": ";
     for (std::string value : values) {
       header += value + ", ";
     }
     header.pop_back();
     header.pop_back();
-    headers.push_back(header);
+    reqHeaders.push_back(header);
   }
 
   void CurlyFry::clearHeaders() {
-    // Clear the headers list
-    headers.clear();
+    // Clear the reqHeaders list
+    reqHeaders.clear();
   }
 
   void CurlyFry::setBody(std::string body) {
@@ -127,7 +131,7 @@ namespace curlyfries {
     request.setOpt(new cURLpp::Options::PostFields());
     // Clear the request body size
     request.setOpt(new cURLpp::Options::PostFieldSize(0));
-    // Clear all headers (we can't exclusively clear the content type)
+    // Clear all reqHeaders (we can't exclusively clear the content type)
     this->clearHeaders();
   }
 
@@ -137,15 +141,17 @@ namespace curlyfries {
   }
 
   int CurlyFry::send() {
-    // Set the headers
-    request.setOpt(new cURLpp::Options::HttpHeader(headers));
+    // Set the reqHeaders
+    request.setOpt(new cURLpp::Options::HttpHeader(reqHeaders));
     // Send the request
     request.perform();
-    // Return the status code
-    return cURLpp::infos::ResponseCode::get(request);
+    // Get the response code
+    int rC = cURLpp::infos::ResponseCode::get(request);
+    // Set the response code in the our class
+    this->response.status = rC;
   }
 
-  std::ostringstream *CurlyFry::getResponse() {
+  Response *CurlyFry::getResponse() {
     // Return the response stream
     return &response;
   }

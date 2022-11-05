@@ -9,15 +9,15 @@
 #include <iostream>
 
 const std::string HELP_MSG =
-    "Usage: uploadr [OPTIONS] [FILE|-]"
-    "\nSpecify a file to upload, use - to read from stdin, or don't specify "
-    "anything to upload the clipboard contents."
-    "\nOPTIONS:"
-    "\n  -h, --help                        Show this help message and exit"
-    "\n  -c=CONFIG, --config=CONFIG        Specify the config directory (must "
-    "be an absolute path)"
-    "\n  -u=UPLOADER, --uploader=UPLOADER  Override the uploader specified in "
-    "the config file";
+  "Usage: uploadr [OPTIONS] [FILE|-]"
+  "\nSpecify a file to upload, use - to read from stdin, or don't specify "
+  "anything to upload the clipboard contents."
+  "\nOPTIONS:"
+  "\n  -h, --help                        Show this help message and exit"
+  "\n  -c=CONFIG, --config=CONFIG        Specify the config directory (must "
+  "be an absolute path)"
+  "\n  -u=UPLOADER, --uploader=UPLOADER  Override the uploader specified in "
+  "the config file";
 
 using namespace std;
 
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     Config::MainConfig *config;
     if (args.exists("c") || args.exists("config")) {
       config = new Config::MainConfig(
-          std::filesystem::path(args.exists("c") ? args["c"] : args["config"])
+        std::filesystem::path(args.exists("c") ? args["c"] : args["config"])
       );
     } else {
       config = new Config::MainConfig();
@@ -49,11 +49,11 @@ int main(int argc, char **argv) {
     Config::UploaderConfig *uploader;
     if (args.exists("u") || args.exists("uploader")) {
       uploader = new Config::UploaderConfig(
-          args.exists("u") ? args["u"] : args["uploader"], config
+        args.exists("u") ? args["u"] : args["uploader"], config
       );
     } else {
       uploader = new Config::UploaderConfig(
-          config->get("defaultUploader").as_string(), config
+        config->get("defaultUploader").as_string(), config
       );
     }
 
@@ -83,14 +83,6 @@ int main(int argc, char **argv) {
     curlyFry->setUrl(uploader->get("request")["url"].as_string());
     curlyFry->setMethod(uploader->get("request")["method"].as_string());
 
-    // Get the raw headers object
-    jsoncons::json headers = uploader->get("request")["headers"];
-
-    // Add the headers to the request
-    for (const auto &header : headers.object_range()) {
-      curlyFry->addHeader(header.key(), header.value().as_string());
-    }
-
     // Now we need to determine what body to send
     // The request.body.type field determines what type of body to send
     // It can be one of the following:
@@ -107,7 +99,7 @@ int main(int argc, char **argv) {
     if (uploader->get("request")["body"].contains("type")) {
       // Get the body type
       std::string bodyType =
-          uploader->get("request")["body"]["type"].as_string();
+        uploader->get("request")["body"]["type"].as_string();
 
       // Check if the body type is MultiPartFormData
       if (bodyType == "MultipartFormData") {
@@ -122,12 +114,12 @@ int main(int argc, char **argv) {
           if (field.value().as_string() == "{content}") {
             // Add the file to the multipart form data
             multipartFormData.push_back(
-                new cURLpp::FormParts::File(field.key(), filePath.string())
+              new cURLpp::FormParts::File(field.key(), filePath.string())
             );
           } else {
             // Add the field to the multipart form data
             multipartFormData.push_back(new cURLpp::FormParts::Content(
-                field.key(), field.value().as_string()
+              field.key(), field.value().as_string()
             ));
           }
         }
@@ -135,6 +127,14 @@ int main(int argc, char **argv) {
         // request
         curlyFry->setBody(multipartFormData);
       }
+    }
+
+    // Get the raw headers object
+    jsoncons::json headers = uploader->get("request")["headers"];
+
+    // Add the headers to the request
+    for (const auto &header : headers.object_range()) {
+      curlyFry->addHeader(header.key(), header.value().as_string());
     }
 
     // Now that we've set up the request, we can send it
@@ -145,11 +145,11 @@ int main(int argc, char **argv) {
     if (responseCode / 100 == 2) {
       // TODO: Parse the response
       // until we can parse the response, just output the response
-      cout << curlyFry->getResponse()->str() << endl;
+      cout << curlyFry->getResponse()->body.str() << endl;
     } else {
       // The response code isn't 2XX
       // Print the response body
-      cout << curlyFry->getResponse()->str() << endl;
+      cout << curlyFry->getResponse()->body.str() << endl;
     }
     return 0;
   } catch (const Config::ConfigError &e) {

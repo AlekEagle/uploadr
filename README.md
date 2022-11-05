@@ -6,6 +6,7 @@ Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprec
 
 - [clip](https://github.com/dacap/clip)
 - [curl](https://curl.haxx.se/)
+- [curlpp](https://www.curlpp.org/)
 - [jsoncons](https://github.com/danielaparker/jsoncons)
 - [libnotify](https://developer.gnome.org/libnotify/)
 - [libpng](http://www.libpng.org/pub/png/libpng.html)

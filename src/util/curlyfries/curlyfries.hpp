@@ -10,14 +10,20 @@
 #include <string>
 
 namespace curlyfries {
+  struct Response {
+      std::ostringstream body;
+      int status;
+      std::list<std::string> headers;
+  };
+
   class CurlyFry {
     protected:
       // The request
       cURLpp::Easy request;
       // Headers
-      std::list<std::string> headers;
-      // Response
-      std::ostringstream response;
+      std::list<std::string> reqHeaders;
+      // The response
+      Response response;
 
     public:
       CurlyFry();
@@ -31,7 +37,7 @@ namespace curlyfries {
       void addHeader(std::string key, std::string value);
       // Add a header (key and list of values style)
       void addHeader(std::string key, std::list<std::string> values);
-      // Clear the headers
+      // Clear the reqHeaders
       void clearHeaders();
       // Set the request body (assume text/plain)
       void setBody(std::string body);
@@ -49,21 +55,13 @@ namespace curlyfries {
       // Set the request body (using binary input stream and content type)
       void setBody(std::istream &stream, std::string contentType);
       // Clear the request body
-      // WARNING: This will also clear any headers that were set
+      // WARNING: This will also clear any reqHeaders that were set
       void clearBody();
       // Set the request method
       void setMethod(std::string method);
       // Send the request and return the status code
       int send();
-      // Get the raw response stream
-      std::ostringstream *getResponse();
-      // Get the response as a string
-      std::string getResponseString();
-      // Get the response as a JSON object
-      jsoncons::json getResponseJSON();
-      // Get the response as an XML document
-      pugi::xml_document getResponseXML();
-      // Get response headers
-      std::list<std::string> getResponseHeaders();
+      // Get the response struct
+      Response *getResponse();
   };
 } // namespace curlyfries
