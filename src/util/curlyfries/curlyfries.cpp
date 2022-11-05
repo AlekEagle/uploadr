@@ -110,7 +110,7 @@ namespace curlyfries {
     this->addHeader("Content-Type", "application/json");
   }
 
-  void CurlyFry::setBody(pugi::xml_document xml) {
+  void CurlyFry::setBody(pugi::xml_document &xml) {
     // Take the XML document and convert it to a string
     std::ostringstream xmlStream;
     xml.save(xmlStream);

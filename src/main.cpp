@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <jsoncons/json.hpp>
+#include <pugixml.hpp>
 
 const std::string HELP_MSG =
   "Usage: uploadr [OPTIONS] [FILE|-]"
@@ -21,6 +23,12 @@ const std::string HELP_MSG =
   "the config file";
 
 using namespace std;
+
+void debug(string msg) {
+  if (getenv("DEBUG") != nullptr) {
+    cout << msg << endl;
+  }
+}
 
 int main(int argc, char **argv) {
   try {
@@ -100,8 +108,13 @@ int main(int argc, char **argv) {
     //   - FormUrlEncoded
     //   - JSON
     //   - XML
-    //   - Binary
-    //   - Text
+    //   - Binary (Text is the same as Binary. It's just a string)
+
+    /*
+    -----------------------------------------------------------------------------------------
+                                       BODY CONSTRUCTION
+    -----------------------------------------------------------------------------------------
+    */
 
     // Check if the body type is undefined
     if (uploader->get("request")["body"].contains("type")) {
@@ -110,6 +123,11 @@ int main(int argc, char **argv) {
         uploader->get("request")["body"]["type"].as_string();
 
       // Check if the body type is MultiPartFormData
+      // TODO: There's probably a better way to do this, like iterating over the
+      //       fields first and then then deciding what to do with the body,
+      //       that way we don't have to make so for statements. Sounds like its
+      //       time for a refactor, and the initial implementation isn't even
+      //       done yet!
       if (bodyType == "MultipartFormData") {
         // Create the multipart form data
         cURLpp::Forms multipartFormData;
@@ -134,7 +152,131 @@ int main(int argc, char **argv) {
         // After we've added all the fields, add the multipart form data to the
         // request
         curlyFry->setBody(multipartFormData);
+      } else if (bodyType == "FormUrlEncoded") {
+        // Create a string to store the form url encoded data
+        std::string formUrlEncodedData;
+        // Get the raw fields object
+        jsoncons::json fields = uploader->get("request")["body"]["fields"];
+        // Use the fields object to add each field
+        // Fields are stored as an object, so we can iterate through it
+        for (auto &field : fields.object_range()) {
+          // Find a field with the value "{content}"
+          if (field.value().as_string() == "{content}") {
+            // Since we can't add files to form url encoded data, we'll just
+            // read the file and add it to the form url encoded data. (It better
+            // be a text file!)
+            // Open the file
+            std::ifstream file(filePath);
+            // Read the file
+            std::string fileContents(
+              (std::istreambuf_iterator<char>(file)),
+              std::istreambuf_iterator<char>()
+            );
+            // Before we add the file contents to the form url encoded data,
+            // we need to make sure it's url encoded
+            formUrlEncodedData += field.key() + "=" +
+                                  curlyfries::CurlyFry::escape(fileContents) +
+                                  "&";
+          } else {
+            // Parse the field value and add it to the form url encoded data
+            formUrlEncodedData += field.key() + "=" +
+                                  syntactic.parse(field.value().as_string()) +
+                                  "&";
+          }
+        }
+        // After we've added all the fields, remove the trailing "&" and add
+        // the form url encoded data to the request
+        formUrlEncodedData.pop_back();
+        curlyFry->setBody(formUrlEncodedData);
+        // Set the content type to application/x-www-form-urlencoded
+        curlyFry->addHeader(
+          "Content-Type", "application/x-www-form-urlencoded"
+        );
+      } else if (bodyType == "JSON") {
+        // Create a json object to store the json data
+        jsoncons::json jsonData;
+        // Get the raw fields object
+        jsoncons::json fields = uploader->get("request")["body"]["fields"];
+        // For now, we only can work with shallow json objects, no nested
+        // objects or arrays
+        // Use the fields object to add each field
+        // Fields are stored as an object, so we can iterate through it
+        for (auto &field : fields.object_range()) {
+          // Find a field with the value "{content}"
+          if (field.value().as_string() == "{content}") {
+            // Since we can't add files to json data, we'll just read the file
+            // and add it to the json data. (It better be a text file!)
+            // Open the file
+            std::ifstream file(filePath);
+            // Read the file
+            std::string fileContents(
+              (std::istreambuf_iterator<char>(file)),
+              std::istreambuf_iterator<char>()
+            );
+            // Add the file contents to the json data
+            jsonData[field.key()] = fileContents;
+          } else {
+            // Parse the field value and add it to the json data
+            jsonData[field.key()] = syntactic.parse(field.value().as_string());
+          }
+        }
+
+        // After we've added all the fields, add the json data to the request
+        curlyFry->setBody(jsonData);
+        // We don't need to set the content type, because it's already set when
+        // we pass a json object for the body
+      } else if (bodyType == "XML") {
+        // Use a pugixml document to store the xml data
+        pugi::xml_document xmlData;
+        // Get the raw fields object
+        jsoncons::json fields = uploader->get("request")["body"]["fields"];
+        // For now, we only can work with shallow xml documents, no nested
+        // elements
+        // Use the fields object to add each field
+        // Fields are stored as an object, so we can iterate through it
+        for (auto &field : fields.object_range()) {
+          // Find a field with the value "{content}"
+          if (field.value().as_string() == "{content}") {
+            // Since we can't add files to xml data, we'll just read the file
+            // and add it to the xml data. (It better be a text file!)
+            // Open the file
+            std::ifstream file(filePath);
+            // Read the file
+            std::string fileContents(
+              (std::istreambuf_iterator<char>(file)),
+              std::istreambuf_iterator<char>()
+            );
+            // Add the file contents to a pugixml node and add it to the xml
+            // document
+            pugi::xml_node node = xmlData.append_child(field.key().c_str());
+            node.append_child(pugi::node_pcdata)
+              .set_value(fileContents.c_str());
+          } else {
+            // Parse the field value and add it to the xml data
+            pugi::xml_node node = xmlData.append_child(field.key().c_str());
+            node.append_child(pugi::node_pcdata)
+              .set_value(syntactic.parse(field.value().as_string()).c_str());
+          }
+        }
+
+        // After we've added all the fields, add the xml data to the request
+        curlyFry->setBody(xmlData);
+      } else if (bodyType == "Binary" || bodyType == "Text") {
+        // We can't use fields with binary data, so we'll just read the file
+        // and add it directly to the request
+        // Open a file stream to the file and pass it to the request
+        std::ifstream file(filePath);
+        curlyFry->setBody(file);
+        // Set the content type to application/octet-stream
+        curlyFry->addHeader("Content-Type", "application/octet-stream");
+      } else {
+        // We don't know what body type it is, so we'll just fail
+        // spectacularly
+        throw std::runtime_error("Unknown body type: " + bodyType);
       }
+    } else {
+      // Assume the body type is None
+      // Do nothing
     }
 
     // Get the raw headers object
@@ -146,7 +288,6 @@ int main(int argc, char **argv) {
     }
 
     // Now that we've set up the request, we can send it
-    // Send the request
     int responseCode = curlyFry->send();
 
     // Check if the response code is 2XX
@@ -155,8 +296,14 @@ int main(int argc, char **argv) {
       std::string response =
         syntactic.parse(uploader->get("response")["url"].as_string());
 
+      debug(to_string(curlyFry->getResponse()->status));
+
       // Print the response
       cout << response << endl;
+    } else {
+      // TODO: Handle non okay requests
+      // until then, print the response
+      cout << curlyFry->getResponse()->body.str() << endl;
     }
     return 0;
   } catch (const Config::ConfigError &e) {

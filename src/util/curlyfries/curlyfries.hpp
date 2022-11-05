@@ -29,6 +29,13 @@ namespace curlyfries {
       Response response;
 
     public:
+      static std::string escape(std::string str) {
+        return curlpp::escape(str);
+      }
+
+      static std::string unescape(std::string str) {
+        return curlpp::unescape(str);
+      }
       CurlyFry();
       CurlyFry(std::string url, std::string method = "GET");
       ~CurlyFry();
@@ -51,7 +58,7 @@ namespace curlyfries {
       // Set the request body (using JSON object)
       void setBody(jsoncons::json json);
       // Set the request body (using XML document)
-      void setBody(pugi::xml_document xml);
+      void setBody(pugi::xml_document &xml);
       // Set the request body (using binary input stream)
       // assume content type is application/octet-stream
       void setBody(std::istream &stream);
