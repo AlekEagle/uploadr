@@ -1,6 +1,10 @@
 #include "syntactic.hpp"
 #include <base64.h>
+#include <iostream>
+#include <jsoncons/json.hpp>
+#include <jsoncons_ext/jsonpath/jsonpath.hpp>
 #include <list>
+#include <pugixml.hpp>
 #include <string>
 
 namespace Syntactic {
@@ -40,7 +44,7 @@ namespace Syntactic {
 
           end = i;
 
-          return call(text.substr(start, i - start), params);
+          return call(result, params);
         }
       }
 
@@ -51,7 +55,7 @@ namespace Syntactic {
     end = i;
 
     if (isFunction) {
-      return call(text.substr(start, i - start), {});
+      return call(result, {});
     }
 
     return result;
@@ -109,7 +113,7 @@ namespace Syntactic {
       } else {
         return "";
       }
-    } else if (name == "base64") { // base64 function: take all parameters, join
+    } else if (name == "base64") { // base64 function: Take all parameters, join
                                    // them together, convert the end result to
                                    // base64, and return that
       if (params.empty()) {
@@ -124,6 +128,53 @@ namespace Syntactic {
       }
 
       return base64_encode(paramsJoined, true);
+    } else if (name == "json") { // json function: Take the first parameter as a
+                                 // jsonpath, use the body from the response as
+                                 // the json, and return the result
+
+      // Is the response ready?
+      if (!data.response->ready) {
+        throw ResponseNotReadyError();
+      }
+
+      if (params.size() == 0) {
+        throw MissingFunctionParameterError("json", 0, 1);
+      }
+
+      std::string jsonPath = params.front();
+
+      jsoncons::json json = jsoncons::json::parse(data.response->body.str());
+      jsoncons::json result = jsoncons::jsonpath::json_query(json, jsonPath)[0];
+
+      return result.as_string();
+    } else if (name == "xml") { // xml function: Same premise as JSON, but for
+                                // XML
+      // Is the response ready?
+      if (!data.response->ready) {
+        throw ResponseNotReadyError();
+      }
+
+      if (params.size() == 0) {
+        throw MissingFunctionParameterError("xml", 0, 1);
+      }
+
+      std::string xmlPath = params.front();
+
+      pugi::xml_document doc;
+      pugi::xml_parse_result result =
+        doc.load_string(data.response->body.str().c_str());
+
+      if (!result) {
+        throw std::runtime_error(result.description());
+      }
+
+      pugi::xpath_node_set nodes = doc.select_nodes(xmlPath.c_str());
+
+      if (nodes.size() == 0) {
+        return "";
+      }
+
+      return nodes[0].node().child_value();
     }
 
     throw UnknownFunctionError(name);

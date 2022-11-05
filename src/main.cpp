@@ -151,13 +151,12 @@ int main(int argc, char **argv) {
 
     // Check if the response code is 2XX
     if (responseCode / 100 == 2) {
-      // TODO: Parse the response
-      // until we can parse the response, just output the response
-      cout << curlyFry->getResponse()->body.str() << endl;
-    } else {
-      // The response code isn't 2XX
-      // Print the response body
-      cout << curlyFry->getResponse()->body.str() << endl;
+      // Use syntactic to parse the response
+      std::string response =
+        syntactic.parse(uploader->get("response")["url"].as_string());
+
+      // Print the response
+      cout << response << endl;
     }
     return 0;
   } catch (const Config::ConfigError &e) {
