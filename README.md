@@ -11,21 +11,23 @@ Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprec
 - [libnotify](https://developer.gnome.org/libnotify/)
 - [libpng](http://www.libpng.org/pub/png/libpng.html)
 - [x11-dev](https://www.x.org/wiki/)
+- [libmagic](https://www.darwinsys.com/file/)
 
 ## Building
 
 ### Debian/Ubuntu based distros
 
 ```bash
-sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev libpng-dev libx11-dev cmake build-essential git
+sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev libpng-dev libx11-dev libmagic-dev cmake build-essential git
 ```
 
 ### Arch Linux
 
 ```bash
-sudo pacman -S curl jsoncpp libnotify libpng xorgproto cmake make git
+sudo pacman -S curl jsoncpp libnotify libpng xorgproto libmagic cmake make git
 # libcurlpp is not available in the official repos, so you'll have to get it from the AUR
-# using your favorite AUR helper
+# using your favorite AUR helper, for example:
+paru -S libcurlpp
 ```
 
 ```bash
@@ -38,10 +40,6 @@ make
 ```
 
 If you want to install it, run `sudo make install`.
-
-## Installation
-
-You can't (yet).
 
 ## TODO
 

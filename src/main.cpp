@@ -1,6 +1,8 @@
+#include "util/cloning-machine/cloning-machine.hpp"
 #include "util/config/config.hpp"
 #include "util/curlyfries/curlyfries.hpp"
 #include "util/flags/flags.hpp"
+#include "util/pigeonhole/pigeonhole.hpp"
 #include "util/syntactic/syntactic.hpp"
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
@@ -9,7 +11,9 @@
 #include <fstream>
 #include <iostream>
 #include <jsoncons/json.hpp>
+#include <magic.h>
 #include <pugixml.hpp>
+#include <unistd.h>
 
 const std::string HELP_MSG =
   "Usage: uploadr [OPTIONS] [FILE|-]"
@@ -25,7 +29,7 @@ const std::string HELP_MSG =
 using namespace std;
 
 void debug(string msg) {
-  if (getenv("DEBUG") != nullptr) {
+  if (getenv("DEBUG") != NULL) {
     cout << msg << endl;
   }
 }
@@ -66,12 +70,33 @@ int main(int argc, char **argv) {
       );
     }
 
+    // Setup pigeonhole
+    Pigeonhole::Archive pigeonhole(*config);
+
     // Get the path to the file to upload
     std::filesystem::path filePath;
     if (args.arguments[0] == "-") {
-      // TODO: Read from stdin
-      // until we can read from stdin, just fail spectacularly
-      throw std::runtime_error("Reading from stdin is not yet supported");
+      // TODO: this is broken, everything ends up completely empty
+      // Before we do anything, check if stdin is a TTY
+      if (isatty(fileno(stdin))) {
+        // If it is, print an error message and exit
+        cerr << "Error: stdin is a TTY" << endl;
+        return 1;
+      }
+      // Before we do anything, check if stdin actually has any data
+      if (std::cin.peek() == std::ifstream::traits_type::eof()) {
+        // If not, tell the user they're an idiot and exit
+        cerr << "Error: No data was passed to stdin" << endl;
+        return 1;
+      }
+      // Use piegonhole to create a file we can later upload
+      // clone the stdin stream
+
+      std::string filename = pigeonhole.addFile(std::cin);
+      filePath =
+        std::filesystem::path(config->get("archive")["path"].as_string()) /
+        filename;
+
     } else if (args.arguments[0] == "") {
       // TODO: Read from clipboard
       // until we can read from the clipboard, just fail spectacularly
@@ -292,14 +317,34 @@ int main(int argc, char **argv) {
 
     // Check if the response code is 2XX
     if (responseCode / 100 == 2) {
-      // Use syntactic to parse the response
-      std::string response =
+      // Use syntactic to parse the responseUrl
+      std::string responseUrl =
         syntactic.parse(uploader->get("response")["url"].as_string());
+      std::string manageUrl;
+      std::string thumbnailUrl;
+      // Check if the uploader expects other URLs (i.e. a manage url or
+      // thumbnail url)
+      if (uploader->get("response").contains("manageUrl")) {
+        // Use syntactic to parse the manageUrl
+        manageUrl =
+          syntactic.parse(uploader->get("response")["manageUrl"].as_string());
+      }
 
-      debug(to_string(curlyFry->getResponse()->status));
+      if (uploader->get("response").contains("thumbnailUrl")) {
+        // Use syntactic to parse the thumbnailUrl
+        thumbnailUrl =
+          syntactic.parse(uploader->get("response")["thumbnailUrl"].as_string()
+          );
+      }
 
-      // Print the response
-      cout << response << endl;
+      // Print the response urls
+      cout << responseUrl << endl;
+      if (!manageUrl.empty()) {
+        cout << manageUrl << endl;
+      }
+      if (!thumbnailUrl.empty()) {
+        cout << thumbnailUrl << endl;
+      }
     } else {
       // TODO: Handle non okay requests
       // until then, print the response

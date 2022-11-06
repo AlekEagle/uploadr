@@ -70,19 +70,25 @@ Flags::Flags(int argc, char **argv) {
             }
           }
         } else {
-          // Get the flag name
-          std::string flag = arg.substr(1, 1);
+          // Is it actually a short tail flag and not just a dash?
+          if (arg.length() != 1) {
+            // Get the flag name
+            std::string flag = arg.substr(1, 1);
 
-          // Check if the flag has a value
-          if (arg.find('=') != std::string::npos) {
-            // Get the flag value
-            std::string value = arg.substr(arg.find('=') + 1);
+            // Check if the flag has a value
+            if (arg.find('=') != std::string::npos) {
+              // Get the flag value
+              std::string value = arg.substr(arg.find('=') + 1);
 
-            // Set the flag value
-            flagMap[flag] = value;
+              // Set the flag value
+              flagMap[flag] = value;
+            } else {
+              // Set the flag value to true
+              flagMap[flag] = "true";
+            }
           } else {
-            // Set the flag value to true
-            flagMap[flag] = "true";
+            // Add the argument to the arguments list
+            arguments[arguments.size()] = arg;
           }
         }
       }

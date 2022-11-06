@@ -21,6 +21,7 @@ namespace Config {
     config["archive"]["histFile"] = (fs::path(getenv("HOME")) / ".local" /
                                      "share" / "uploadr" / "history.csv")
                                       .u8string();
+    config["archive"]["maxCount"] = 1000;
     config["clipboard"]["enabled"] = true;
     config["notification"]["enabled"] = true;
     config["notification"]["timeout"] = 5;
@@ -37,7 +38,7 @@ namespace Config {
     config["request"]["body"]["type"] = "MultipartFormData";
     config["request"]["body"]["fields"]["image"] = "{content}";
     config["response"]["url"] = "{json:$.data.link}";
-    config["response"]["manageURL"] =
+    config["response"]["manageUrl"] =
       "https://imgur.com/delete/{json:data.deletehash}";
 
     return config;
