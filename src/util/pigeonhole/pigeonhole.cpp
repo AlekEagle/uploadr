@@ -10,14 +10,14 @@
 // Pigeonhole, the archive manager for uploadr
 namespace Pigeonhole {
 
-  std::string Archive::addFile(std::istream &stream) {
+  std::string Archive::addFile(std::vector<char>& buffer) {
     // First, get a timestamp for the file
     std::string timestamp = Archive::curDateTimeToString();
     // Next, get the file's extension
-    std::string extension = Cookies::getExtension(stream);
+    std::string extension = Cookies::getExtension(buffer.data(), buffer.size());
     // Next, if the extension is empty, fall back to the mime type
     if (extension.empty()) {
-      std::string mime = Cookies::getMimeType(stream);
+      std::string mime = Cookies::getMimeType(buffer.data(), buffer.size());
       // If the MIME type is text/plain, fall back to .txt
       if (mime == "text/plain") {
         extension = "txt";
@@ -35,8 +35,8 @@ namespace Pigeonhole {
     std::filesystem::create_directories(path.parent_path());
     // Now, we can create the file
     std::ofstream file(path);
-    // And copy the stream into it
-    file << stream.rdbuf();
+    // And write the buffer to the file
+    file.write(buffer.data(), buffer.size());
     // Finally, return the filename
     return filename;
   }
