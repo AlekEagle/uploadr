@@ -91,8 +91,11 @@ int main(int argc, char **argv) {
       }
       // Use piegonhole to create a file we can later upload
       // clone the stdin stream
+      vector<char> buffer(
+        (istreambuf_iterator<char>(std::cin)), (istreambuf_iterator<char>())
+      );
 
-      std::string filename = pigeonhole.addFile(std::cin);
+      std::string filename = pigeonhole.addFile(buffer);
       filePath =
         std::filesystem::path(config->get("archive")["path"].as_string()) /
         filename;

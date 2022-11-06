@@ -34,7 +34,7 @@ namespace Pigeonhole {
       }
       Archive(Config::MainConfig &config) : config(config) {
       }
-      std::string addFile(std::istream &stream);
+      std::string addFile(std::vector<char>& buffer);
       std::string addFile(std::filesystem::path path);
       std::string addFile(std::string path);
 
