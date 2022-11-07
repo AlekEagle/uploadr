@@ -2,9 +2,9 @@
 
 Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprecated [sharenix](https://github.com/Francesco149/sharenix).
 
-## Compatible with
+## Compatible With
 
-### Built and tested on
+### Built and Tested on
 
 - KDE neon (It's essentially Ubuntu 22.04 LTS)
 - Arch Linux
@@ -32,9 +32,11 @@ The only strict requirements is that you must be using X11 (Wayland is unsupport
 - [x11-dev](https://www.x.org/wiki/)
 - [libmagic](https://www.darwinsys.com/file/)
 
-## Building
+## Installing Dependencies
 
-### Debian/Ubuntu based distros
+To build uploadr we first have to get everything ready. Let's install the build dependencies, most runtime dependencies are bundled with uploadr when you recursively pull, so you shouldn't have to worry about those.
+
+### Debian/Ubuntu Based Distros
 
 ```bash
 sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev libpng-dev libx11-dev libmagic-dev cmake build-essential git
@@ -49,16 +51,64 @@ sudo pacman -S curl jsoncpp libnotify libpng xorgproto libmagic cmake make git
 paru -S libcurlpp
 ```
 
+## Building
+
+Clone the repository recursively, to get additional dependencies that we don't (and probably can't (unless you're an Arch user with the AUR (I'm looking at you random stranger using Arch))) need to install from package repositories, make a build directory, configure cmake, and build uploadr.
+
 ```bash
 # Clone the repo and the submodules and cd into it
 git clone --recursive https://github.com/AlekEagle/uploadr.git && cd uploadr
 # Create a build directory and cd into it
 mkdir build && cd build
+# Configure cmake and have cmake build Makefiles
 cmake ..
+# Build!
 make
 ```
 
-If you want to install it, run `sudo make install`.
+## Installation
+
+If you would like to install uploadr so it can be accessible system-wide, follow these instructions here:
+
+### Built from Source
+
+```bash
+# After running make from earlier.
+# CWD: uploadr/build/
+sudo make install
+```
+
+## Uninstallation
+
+If you no longer need or want uploadr to be installed system-side, follow these instructions here:
+
+### Built from Source
+
+```bash
+# CWD: uploadr/build/
+sudo make uninstall
+```
+
+## Updating
+
+### Built from Source
+
+```bash
+# CWD: uploadr/
+# Pull recursively to keep our other important packages up-to-date
+git pull --resursive
+# Delete the build directory. This isn't strictly necessary, but might prevent strange build issues.
+rm -rf build
+# If this fails, you might've ran the make command as root, simply run the command again but as root.
+# Make a new clean build directory and enter it
+mkdir build && cd build
+# Configure cmake and have cmake build Makefiles
+cmake ..
+# Build!
+make
+# Update installed binaries and libraries
+sudo make install
+```
 
 ## TODO
 
