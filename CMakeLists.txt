@@ -12,6 +12,7 @@ project(uploadr)
 find_package(PkgConfig REQUIRED)
 
 # DEPENDENCIES
+pkg_check_modules(NOTIFY REQUIRED libnotify)
 pkg_check_modules(CURL REQUIRED curlpp)
 pkg_check_modules(X11 REQUIRED x11)
 pkg_check_modules(PNG REQUIRED libpng)
@@ -54,6 +55,7 @@ target_link_libraries(
   ${X11_LIBRARIES}
   ${PNG_LIBRARIES}
   ${MAGIC_LIBRARIES}
+  ${NOTIFY_LIBRARIES}
 )
 
 # EXECUTABLE INCLUDES
@@ -65,6 +67,7 @@ target_include_directories(
   ${X11_INCLUDE_DIRS}
   ${PNG_INCLUDE_DIRS}
   ${MAGIC_INCLUDE_DIRS}
+  ${NOTIFY_INCLUDE_DIRS}
   ${LIB_DIR}/clip
   ${LIB_DIR}/jsoncons/include
   ${LIB_DIR}/pugixml/src
