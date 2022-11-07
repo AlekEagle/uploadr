@@ -83,3 +83,5 @@ add_custom_command(
   COMMAND xargs rm -vf < install_manifest.txt || echo Nothing in
   install_manifest.txt to be uninstalled!
 )
+
+install(TARGETS uploadr RUNTIME DESTINATION bin)
