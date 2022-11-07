@@ -39,7 +39,7 @@ namespace Config {
     config["request"]["body"]["fields"]["image"] = "{content}";
     config["response"]["url"] = "{json:$.data.link}";
     config["response"]["manageUrl"] =
-      "https://imgur.com/delete/{json:data.deletehash}";
+      "https://imgur.com/delete/{json:$.data.deletehash}";
 
     return config;
   }
