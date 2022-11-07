@@ -2,6 +2,25 @@
 
 Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprecated [sharenix](https://github.com/Francesco149/sharenix).
 
+## Compatible with
+
+### Built and tested on
+
+- KDE neon (It's essentially Ubuntu 22.04 LTS)
+- Arch Linux
+
+### Untested but should generally work with
+
+- Any Debian/Ubuntu based Linux distribution
+- Most UNIX systems
+- macOS (maybe? you'd probably have to tweak some dependencies or something. Personally I wouldn't trust it being very stable)
+
+The only strict requirements is that you must be using X11 (Wayland is unsupported and won't be actively maintained by me, feel free to contribute though!)
+
+## NOT Compatible With
+
+- Windows
+
 ## Dependencies
 
 - [clip](https://github.com/dacap/clip)
@@ -26,7 +45,7 @@ sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev
 ```bash
 sudo pacman -S curl jsoncpp libnotify libpng xorgproto libmagic cmake make git
 # libcurlpp is not available in the official repos, so you'll have to get it from the AUR
-# using your favorite AUR helper, for example:
+# using your favorite AUR helper, here's an example with paru:
 paru -S libcurlpp
 ```
 
