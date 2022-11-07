@@ -89,6 +89,7 @@ namespace Config {
   }
 
   UploaderConfig::UploaderConfig(std::string name, MainConfig *mainConfig) {
+    this->uploaderName = name;
     this->configPath =
       mainConfig->getConfigPath() / "uploaders" / (name + ".uploader");
     this->mainConfig = mainConfig;
@@ -122,6 +123,10 @@ namespace Config {
 
   jsoncons::json UploaderConfig::getRaw() {
     return this->config;
+  }
+
+  std::string UploaderConfig::getName() {
+    return this->uploaderName;
   }
 
   ConfigError::ConfigError(std::string message) {

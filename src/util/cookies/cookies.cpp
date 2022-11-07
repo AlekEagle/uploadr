@@ -19,6 +19,10 @@ namespace Cookies {
     return mime;
   }
 
+  string getMimeType(vector<char> &buffer, int flags) {
+    return getMimeType(buffer.data(), buffer.size(), flags);
+  }
+
   string getMimeType(istream &stream, int flags) {
     magic_t magic = magic_open(flags);
     magic_load(magic, NULL);
@@ -50,6 +54,10 @@ namespace Cookies {
     string ext = magic_buffer(magic, buffer, size);
     magic_close(magic);
     return ext;
+  }
+
+  string getExtension(vector<char> &buffer, int flags) {
+    return getExtension(buffer.data(), buffer.size(), flags);
   }
 
   string getExtension(istream &stream, int flags) {

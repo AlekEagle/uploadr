@@ -9,6 +9,7 @@
 #include <pugixml.hpp>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace curlyfries {
   struct Response {
@@ -64,6 +65,11 @@ namespace curlyfries {
       void setBody(std::istream &stream);
       // Set the request body (using binary input stream and content type)
       void setBody(std::istream &stream, std::string contentType);
+      // Set the request body (using vector char buffer)
+      // assume content type is application/octet-stream
+      void setBody(std::vector<char> &buffer);
+      // Set the request body (using vector char buffer and content type)
+      void setBody(std::vector<char> &buffer, std::string contentType);
       // Clear the request body
       // WARNING: This will also clear any reqHeaders that were set
       void clearBody();

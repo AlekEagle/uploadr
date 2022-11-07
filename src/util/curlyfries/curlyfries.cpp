@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace curlyfries {
   CurlyFry::CurlyFry() {
@@ -133,6 +134,24 @@ namespace curlyfries {
   void CurlyFry::setBody(std::istream &stream, std::string contentType) {
     // Set the request body
     request.setOpt(new cURLpp::Options::ReadStream(&stream));
+    // Set the content type
+    this->addHeader("Content-Type", contentType);
+  }
+
+  void CurlyFry::setBody(std::vector<char> &buffer) {
+    // Set the request body
+    request.setOpt(new cURLpp::Options::PostFields(buffer.data()));
+    // Set the request body size
+    request.setOpt(new cURLpp::Options::PostFieldSize(buffer.size()));
+    // Set the content type (assume application/octet-stream)
+    this->addHeader("Content-Type", "application/octet-stream");
+  }
+
+  void CurlyFry::setBody(std::vector<char> &buffer, std::string contentType) {
+    // Set the request body
+    request.setOpt(new cURLpp::Options::PostFields(buffer.data()));
+    // Set the request body size
+    request.setOpt(new cURLpp::Options::PostFieldSize(buffer.size()));
     // Set the content type
     this->addHeader("Content-Type", contentType);
   }

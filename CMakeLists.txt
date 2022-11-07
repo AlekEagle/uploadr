@@ -13,7 +13,6 @@ find_package(PkgConfig REQUIRED)
 
 # DEPENDENCIES
 pkg_check_modules(CURL REQUIRED curlpp)
-pkg_check_modules(NOTIFY REQUIRED libnotify)
 pkg_check_modules(X11 REQUIRED x11)
 pkg_check_modules(PNG REQUIRED libpng)
 pkg_check_modules(MAGIC REQUIRED libmagic)
@@ -51,7 +50,6 @@ target_link_libraries(
   clip
   pugixml
   cpp-base64
-  ${NOTIFY_LIBRARIES}
   ${CURL_LIBRARIES}
   ${X11_LIBRARIES}
   ${PNG_LIBRARIES}
@@ -63,7 +61,6 @@ target_include_directories(
   uploadr
   PUBLIC
   ${INCLUDE_DIR}
-  ${NOTIFY_INCLUDE_DIRS}
   ${CURL_INCLUDE_DIRS}
   ${X11_INCLUDE_DIRS}
   ${PNG_INCLUDE_DIRS}

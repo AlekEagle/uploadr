@@ -1,8 +1,10 @@
-#include "util/cloning-machine/cloning-machine.hpp"
+#include "util/clipboard/clipboard.hpp"
 #include "util/config/config.hpp"
+#include "util/cookies/cookies.hpp"
 #include "util/curlyfries/curlyfries.hpp"
 #include "util/flags/flags.hpp"
 #include "util/pigeonhole/pigeonhole.hpp"
+#include "util/stopgap/stopgap.hpp"
 #include "util/syntactic/syntactic.hpp"
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
@@ -21,6 +23,8 @@ const std::string HELP_MSG =
   "anything to upload the clipboard contents."
   "\nOPTIONS:"
   "\n  -h, --help                        Show this help message and exit"
+  "\n  -H, --history                     Output a greppable history of all "
+  "files you've uploaded"
   "\n  -c=CONFIG, --config=CONFIG        Specify the config directory (must "
   "be an absolute path)"
   "\n  -u=UPLOADER, --uploader=UPLOADER  Override the uploader specified in "
@@ -70,13 +74,36 @@ int main(int argc, char **argv) {
       );
     }
 
-    // Setup pigeonhole
-    Pigeonhole::Archive pigeonhole(*config);
+    // See if the user wants to store uploads in the archive
+    Pigeonhole::Archive *archive;
+    if (config->get("archive")["enabled"].as_bool()) {
+      archive = new Pigeonhole::Archive(*config);
+    } else {
+      archive = NULL;
+    }
 
-    // Get the path to the file to upload
-    std::filesystem::path filePath;
-    if (args.arguments[0] == "-") {
-      // TODO: this is broken, everything ends up completely empty
+    // Check if the user wants to output the history
+    if (args.getBool("H") || args.getBool("history")) {
+      // If the archive is disabled, tell the user
+      if (archive == NULL) {
+        cerr << "Archive is disabled, cannot output history" << endl;
+        return 1;
+      }
+
+      // Output the history
+      cout << archive->outputHistory() << endl;
+
+      // Exit
+      return 0;
+    }
+
+    // Create a stopgap object to store our files in
+    Stopgap stopgap;
+
+    // Create a stopgap file to store the file contents in
+    std::string fnameOverride;
+    StopgapFile file(stopgap.createFile());
+    if (args.arguments[0] == "-") { // Read from stdin
       // Before we do anything, check if stdin is a TTY
       if (isatty(fileno(stdin))) {
         // If it is, print an error message and exit
@@ -89,29 +116,48 @@ int main(int argc, char **argv) {
         cerr << "Error: No data was passed to stdin" << endl;
         return 1;
       }
-      // Use piegonhole to create a file we can later upload
-      // clone the stdin stream
-      vector<char> buffer(
-        (istreambuf_iterator<char>(std::cin)), (istreambuf_iterator<char>())
-      );
 
-      std::string filename = pigeonhole.addFile(buffer);
-      filePath =
-        std::filesystem::path(config->get("archive")["path"].as_string()) /
-        filename;
+      // Read the contents of stdin into the stopgap file
+      file.pipe(std::cin);
 
-    } else if (args.arguments[0] == "") {
-      // TODO: Read from clipboard
-      // until we can read from the clipboard, just fail spectacularly
-      throw std::runtime_error("Reading from the clipboard is not yet supported"
-      );
-    } else {
-      // Use the file specified by the user
-      filePath = std::filesystem::path(args.arguments[0]);
+    } else if (args.arguments[0] == "") { // Read from clipboard
+      // Before we do anything, check if the clipboard actually has any data
+      if (!Clipboard::has()) {
+        // If not, tell the user they're an idiot and exit
+        cerr << "Error: No data was found in the clipboard" << endl;
+        return 1;
+      }
+      // Awesome, the clipboard has data, let's get it and put it in our
+      // fileBuffer
+      // Create a temporary char vector to store the clipboard contents in
+      std::vector<char> clipboardContents;
+      // Get the clipboard contents
+      Clipboard::get(clipboardContents);
+      // Write the clipboard contents to the stopgap file
+      file.writeContents(clipboardContents);
+      // Get the file extension from the clipboard contents
+      fnameOverride =
+        "clipboard-content." + Cookies::getExtension(clipboardContents);
+      // If the extension is "???", we'll just use txt
+      if (fnameOverride == "clipboard-content.???") {
+        fnameOverride = "clipboard-content.txt";
+      }
+    } else { // Read from a file
+      // If the user specified a file, use that
+      // Check if the file exists
+      if (!std::filesystem::exists(std::filesystem::path(args.arguments[0]))) {
+        // If not, tell the user they're an idiot and exit
+        cerr << "Error: File does not exist" << endl;
+        return 1;
+      }
+      // If it does, use it
+      file.pipe(std::ifstream(args.arguments[0], std::ios::binary));
+      // and use the filename as the filename
+      fnameOverride = std::filesystem::path(args.arguments[0]).filename();
     }
 
-    // Now that we have the uploader, we can set up curlyfries with the
-    // uploader's config
+    // Now that we have the uploader and the file info, we can get curlyfries
+    // setup
 
     // Create a new CurlyFry
     curlyfries::CurlyFry *curlyFry = new curlyfries::CurlyFry();
@@ -122,8 +168,9 @@ int main(int argc, char **argv) {
 
     // Create a new syntactic object
     Syntactic::Data data;
-    data.fileName = filePath.filename().string();
-    data.filePath = filePath.string();
+    data.fileName =
+      fnameOverride == "" ? file.getPath().filename().string() : fnameOverride;
+    data.filePath = file.getPath().string();
     data.response = curlyFry->getResponse();
     Syntactic::Syntactic syntactic(data);
 
@@ -167,8 +214,9 @@ int main(int argc, char **argv) {
           // Find a field with the value "{content}"
           if (field.value().as_string() == "{content}") {
             // Add the file to the multipart form data
+            // We can't use the buffer we have, so just give it the filepath
             multipartFormData.push_back(
-              new cURLpp::FormParts::File(field.key(), filePath.string())
+              new cURLpp::FormParts::File(field.key(), file.getPath())
             );
           } else {
             // Parse the field value and add it to the multipart form data
@@ -193,15 +241,10 @@ int main(int argc, char **argv) {
             // Since we can't add files to form url encoded data, we'll just
             // read the file and add it to the form url encoded data. (It better
             // be a text file!)
-            // Open the file
-            std::ifstream file(filePath);
-            // Read the file
+            // Use our buffer from earlier and turn it into a string
             std::string fileContents(
-              (std::istreambuf_iterator<char>(file)),
-              std::istreambuf_iterator<char>()
+              file.getContents().begin(), file.getContents().end()
             );
-            // Before we add the file contents to the form url encoded data,
-            // we need to make sure it's url encoded
             formUrlEncodedData += field.key() + "=" +
                                   curlyfries::CurlyFry::escape(fileContents) +
                                   "&";
@@ -234,12 +277,9 @@ int main(int argc, char **argv) {
           if (field.value().as_string() == "{content}") {
             // Since we can't add files to json data, we'll just read the file
             // and add it to the json data. (It better be a text file!)
-            // Open the file
-            std::ifstream file(filePath);
-            // Read the file
+            // Use our buffer from earlier and turn it into a string
             std::string fileContents(
-              (std::istreambuf_iterator<char>(file)),
-              std::istreambuf_iterator<char>()
+              file.getContents().begin(), file.getContents().end()
             );
             // Add the file contents to the json data
             jsonData[field.key()] = fileContents;
@@ -267,12 +307,9 @@ int main(int argc, char **argv) {
           if (field.value().as_string() == "{content}") {
             // Since we can't add files to xml data, we'll just read the file
             // and add it to the xml data. (It better be a text file!)
-            // Open the file
-            std::ifstream file(filePath);
-            // Read the file
+            // Use our buffer from earlier and turn it into a string
             std::string fileContents(
-              (std::istreambuf_iterator<char>(file)),
-              std::istreambuf_iterator<char>()
+              file.getContents().begin(), file.getContents().end()
             );
             // Add the file contents to a pugixml node and add it to the xml
             // document
@@ -292,11 +329,8 @@ int main(int argc, char **argv) {
       } else if (bodyType == "Binary" || bodyType == "Text") {
         // We can't use fields with binary data, so we'll just read the file
         // and add it directly to the request
-        // Open a file stream to the file and pass it to the request
-        std::ifstream file(filePath);
-        curlyFry->setBody(file);
-        // Set the content type to application/octet-stream
-        curlyFry->addHeader("Content-Type", "application/octet-stream");
+        // Give curlyfries the buffer we have
+        curlyFry->setBody(file.getContents());
       } else {
         // We don't know what body type it is, so we'll just fail
         // spectacularly
@@ -340,6 +374,20 @@ int main(int argc, char **argv) {
           );
       }
 
+      // Does a Pigeonhole::Archive instance exist? (Did the user enable
+      // archiving?)
+      if (archive) {
+        // Since we don't allow stopgap to use the assignment operator, we'll
+        // create a file just with the path
+        Pigeonhole::File archiveFile(archive->addFile(file.getPath()));
+        // Add the urls to the file
+        archiveFile.setURL(responseUrl);
+        archiveFile.setManageURL(manageUrl);
+        archiveFile.setThumbURL(thumbnailUrl);
+        // Commit the file to the archive
+        archiveFile.commit();
+      }
+
       // Print the response urls
       cout << responseUrl << endl;
       if (!manageUrl.empty()) {
@@ -347,6 +395,12 @@ int main(int argc, char **argv) {
       }
       if (!thumbnailUrl.empty()) {
         cout << thumbnailUrl << endl;
+      }
+
+      // Did the user enable clipboard copying?
+      if (config->get("clipboard")["enabled"].as_bool()) {
+        // Copy the response url to the clipboard
+        Clipboard::set(responseUrl);
       }
     } else {
       // TODO: Handle non okay requests

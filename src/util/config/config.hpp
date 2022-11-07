@@ -42,6 +42,7 @@ namespace Config {
       fs::path configPath;
       jsoncons::json config;
       MainConfig *mainConfig;
+      std::string uploaderName;
 
     public:
       UploaderConfig(std::string name, MainConfig *mainConfig);
@@ -51,6 +52,7 @@ namespace Config {
       jsoncons::json get(std::string key);
       jsoncons::json operator[](std::string key);
       jsoncons::json getRaw();
+      std::string getName();
   };
 
   class ConfigError : public std::exception {

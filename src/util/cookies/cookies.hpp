@@ -5,6 +5,7 @@
 #include <magic.h>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -19,6 +20,9 @@ namespace Cookies {
     const char *buffer, size_t size, int flags = DEFAULT_MAGIC_MIME_FLAGS
   );
 
+  string
+  getMimeType(vector<char> &buffer, int flags = DEFAULT_MAGIC_MIME_FLAGS);
+
   string getMimeType(istream &stream, int flags = DEFAULT_MAGIC_MIME_FLAGS);
 
   string getMimeType(const string &path, int flags = DEFAULT_MAGIC_MIME_FLAGS);
@@ -29,6 +33,9 @@ namespace Cookies {
   string getExtension(
     const char *buffer, size_t size, int flags = DEFAULT_MAGIC_EXT_FLAGS
   );
+
+  string
+  getExtension(vector<char> &buffer, int flags = DEFAULT_MAGIC_EXT_FLAGS);
 
   string getExtension(istream &stream, int flags = DEFAULT_MAGIC_EXT_FLAGS);
 

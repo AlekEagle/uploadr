@@ -1,9 +1,11 @@
 #pragma once
 #include "../config/config.hpp"
 #include "../cookies/cookies.hpp"
+#include "../stopgap/stopgap.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <jsoncons_ext/csv/csv.hpp>
 #include <string>
 
 /*
@@ -18,32 +20,57 @@
 
 // Pigeonhole, the archive manager for uploadr
 namespace Pigeonhole {
+  std::string curDateTimeToString();
+  jsoncons::csv::csv_options getCSVOptions();
+  // Individual file class
+  class File {
+    private:
+      std::filesystem::path path;
+      std::string url;
+      std::string manageUrl;
+      std::string thumbUrl;
+      Config::MainConfig &config;
+
+    public:
+      File(Config::MainConfig &config, std::filesystem::path path)
+          : config(config), path(path) {
+      }
+      std::filesystem::path getPath() {
+        return path;
+      }
+      std::string getURL() {
+        return url;
+      }
+      std::string getManageURL() {
+        return manageUrl;
+      }
+      std::string getThumbURL() {
+        return thumbUrl;
+      }
+      void setURL(std::string url) {
+        this->url = url;
+      }
+      void setManageURL(std::string manageUrl) {
+        this->manageUrl = manageUrl;
+      }
+      void setThumbURL(std::string thumbUrl) {
+        this->thumbUrl = thumbUrl;
+      }
+      void commit();
+  };
   // The archive manager
   class Archive {
     private:
       Config::MainConfig &config;
 
     public:
-      static std::string curDateTimeToString() {
-        time_t now = time(0);
-        struct tm tstruct;
-        char buf[80];
-        tstruct = *localtime(&now);
-        strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
-        return buf;
-      }
       Archive(Config::MainConfig &config) : config(config) {
       }
-      std::string addFile(std::vector<char>& buffer);
-      std::string addFile(std::filesystem::path path);
-      std::string addFile(std::string path);
-
-      void setURLs(
-        std::string filename, std::string url, std::string manageurl,
-        std::string thumburl
-      );
-      void
-      setURLs(std::string filename, std::string url, std::string manageurl);
-      void setURLs(std::string filename, std::string url);
+      File addFile(std::filesystem::path path);
+      File addFile(StopgapFile file);
+      Config::MainConfig &getConfig() {
+        return config;
+      }
+      std::string outputHistory();
   };
 } // namespace Pigeonhole
