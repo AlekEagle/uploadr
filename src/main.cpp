@@ -3,6 +3,7 @@
 #include "util/cookies/cookies.hpp"
 #include "util/curlyfries/curlyfries.hpp"
 #include "util/flags/flags.hpp"
+#include "util/not-notify/not-notify.hpp"
 #include "util/pigeonhole/pigeonhole.hpp"
 #include "util/stopgap/stopgap.hpp"
 #include "util/syntactic/syntactic.hpp"
@@ -30,12 +31,15 @@ const std::string HELP_MSG =
   "\n  -u=UPLOADER, --uploader=UPLOADER  Override the uploader specified in "
   "the config file";
 
-using namespace std;
-
-void debug(string msg) {
+void debug(std::string msg) {
   if (getenv("DEBUG") != NULL) {
     cout << msg << endl;
   }
+}
+
+void openURL(std::string url) {
+  std::string cmd = "xdg-open " + url + " > /dev/null 2>&1";
+  system(cmd.c_str());
 }
 
 int main(int argc, char **argv) {
@@ -96,6 +100,18 @@ int main(int argc, char **argv) {
       // Exit
       return 0;
     }
+
+    // Check if the user wants notifications
+    bool notify = config->get("notification")["enabled"].as_bool();
+    if (notify) {
+      // Initialize libnotify
+      if (!NotNotify::init("Uploadr")) {
+        cerr << "Failed to initialize libnotify" << endl;
+        return 1;
+      }
+    }
+
+    NotNotify::Notification *notification;
 
     // Create a stopgap object to store our files in
     Stopgap stopgap;
@@ -349,11 +365,40 @@ int main(int argc, char **argv) {
       curlyFry->addHeader(header.key(), header.value().as_string());
     }
 
+    // If the user want's notifications, we'll send them a notification
+    if (notify) {
+      notification = new NotNotify::Notification(
+        "Uploading", "Uploading " + data.fileName + " to " + uploader->getName()
+      );
+      notification->makePersistent();
+      notification->show();
+    }
+
     // Now that we've set up the request, we can send it
     int responseCode = curlyFry->send();
 
+    // Now that we've sent the request and gotten the response, we can delete
+    // the notification (We have to if we want to send another one)
+    if (notify) {
+      delete notification;
+      // Create a new notification to tell the user if the upload was
+      // successful or not
+      notification = new NotNotify::Notification();
+    }
+
+    notification->setTimeout(
+      config->get("notification")["timeout"].as<int>() * 1000
+    );
+
     // Check if the response code is 2XX
     if (responseCode / 100 == 2) {
+      // The upload was successful
+      if (notify) {
+        notification->updateNotification(
+          "Upload Successful",
+          "Uploaded " + data.fileName + " to " + uploader->getName()
+        );
+      }
       // Use syntactic to parse the responseUrl
       std::string responseUrl =
         syntactic.parse(uploader->get("response")["url"].as_string());
@@ -390,11 +435,46 @@ int main(int argc, char **argv) {
 
       // Print the response urls
       cout << responseUrl << endl;
+      // If we have a notification object, we'll create a default action to
+      // open the response url, as well as a button to open the response url
+      if (notify) {
+        notification->addAction(
+          "default", "Open in Browser",
+          [](NotifyNotification *notification, char *action, void *data) {
+            std::string url = (char *)data;
+            std::string cmd = "xdg-open " + url + " > /dev/null 2>&1";
+            system(cmd.c_str());
+          },
+          (void *)responseUrl.c_str()
+        );
+        notification->addAction(
+          "open-response", "Open in Browser",
+          [](NotifyNotification *notification, char *action, void *data) {
+            std::string url = (char *)data;
+            std::string cmd = "xdg-open " + url + " > /dev/null 2>&1";
+            system(cmd.c_str());
+          },
+          (void *)responseUrl.c_str()
+        );
+      }
       if (!manageUrl.empty()) {
         cout << manageUrl << endl;
+        // If we have a notification object, we'll create a button to open the
+        // manage url
+        notification->addAction(
+          "open-manage", "Manage",
+          [](NotifyNotification *notification, char *action, void *data) {
+            std::string url = (char *)data;
+            std::string cmd = "xdg-open " + url + " > /dev/null 2>&1";
+            system(cmd.c_str());
+          },
+          (void *)manageUrl.c_str()
+        );
       }
       if (!thumbnailUrl.empty()) {
         cout << thumbnailUrl << endl;
+        // TODO: if we have a notification object, get the thumbnail from the
+        // url and set it as the notification's icon
       }
 
       // Did the user enable clipboard copying?
@@ -402,12 +482,26 @@ int main(int argc, char **argv) {
         // Copy the response url to the clipboard
         Clipboard::set(responseUrl);
       }
+
+      notification->show();
+      // Start the event loop so we can handle notification actions.
+      // This will block the thread until the notification is closed
+      notification->runLoop();
+      return 0;
     } else {
-      // TODO: Handle non okay requests
+      // The upload failed
+      if (notify) {
+        notification->updateNotification(
+          "Upload Failed",
+          "Failed to upload " + data.fileName + " to " + uploader->getName()
+        );
+      }
+      // TODO: Handle non okay requests better
       // until then, print the response
       cout << curlyFry->getResponse()->body.str() << endl;
+      notification->show();
+      return 1;
     }
-    return 0;
   } catch (const Config::ConfigError &e) {
     // Print the error message
     cerr << e.what() << endl;

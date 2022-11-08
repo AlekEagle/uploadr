@@ -120,9 +120,11 @@ sudo make install
 - [x] Put response URL on the clipboard after successful upload
 - [x] Have a greppable history of uploaded files
 - [x] Automatically delete old files from history (configurable)
-- [ ] Display notification of upload status
-- [ ] Display notification when an upload is successful
-- [ ] Successful upload notifications have action buttons to open the various URLs returned from successful upload responses.
+- [x] Display notification of upload status
+- [x] Display notification when an upload is successful
+- [x] Successful upload notifications have action buttons to open the various URLs returned from successful upload responses.
+- [x] Display notification when an upload fails.
+- [ ] Display additional information when upload fails.
 - [ ] Display a thumbnail of the uploaded file using thumbnail URL returned from upload (if present)
 - [ ] Make a PKGBUILD for MPR
 - [ ] Make a PKGBUILD for AUR (If it's possible to have a PKGBUILD for both MPR and AUR)
