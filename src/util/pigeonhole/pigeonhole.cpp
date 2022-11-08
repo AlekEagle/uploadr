@@ -83,6 +83,8 @@ namespace Pigeonhole {
 
   // Individual file class
   void File::commit() {
+    // Before we do anything else, make sure the archive directory exists
+    std::filesystem::create_directories(config["archive"]["path"].as_string());
     // The file to archive isn't in the archive yet until this function is
     // called, that way we don't have to worry about deleting the file if
     // the user doesn't want to archive it
