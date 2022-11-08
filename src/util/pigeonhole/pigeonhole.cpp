@@ -148,14 +148,8 @@ namespace Pigeonhole {
       // Get the name of the oldest entry so we can delete the file later
       std::string oldestEntry = history[0]["Filename"].as_string();
       // Remove the oldest entry
-      // Tell the C++ compiler to shut up about the null value where a
-      // non-null value
-// was expected, it's not null it's just a zero
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnonnull"
-      history.erase((std::size_t)0);
-#pragma GCC diagnostic pop
-      // Now, we need to delete the old file
+      auto first = history.array_range().begin();
+      history.erase(first);
       std::filesystem::remove(
         std::filesystem::path(config["archive"]["path"].as_string()) /
         oldestEntry
