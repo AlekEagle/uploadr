@@ -15,7 +15,7 @@ namespace Pigeonhole {
     struct tm tstruct;
     char buf[80];
     tstruct = *localtime(&now);
-    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%H:%M:%S", &tstruct);
     return buf;
   }
   jsoncons::csv::csv_options getCSVOptions() {
