@@ -13,13 +13,13 @@ Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprec
 
 - Any Debian/Ubuntu based Linux distribution
 - Most UNIX systems
+- macOS (Much more involved, and notifications do not work)
 
 The only strict requirements is that you must be using X11 (Wayland is unsupported and won't be actively maintained by me, feel free to contribute though!)
 
 ## NOT Compatible With
 
 - Windows
-- macOS (I tried, it doesn't work)
 
 ## Dependencies
 
