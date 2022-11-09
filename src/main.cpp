@@ -483,10 +483,12 @@ int main(int argc, char **argv) {
         Clipboard::set(responseUrl);
       }
 
-      notification->show();
-      // Start the event loop so we can handle notification actions.
-      // This will block the thread until the notification is closed
-      notification->runLoop();
+      if (notify) {
+        notification->show();
+        // Start the event loop so we can handle notification actions.
+        // This will block the thread until the notification is closed
+        notification->runLoop();
+      }
       return 0;
     } else {
       // The upload failed
@@ -499,7 +501,9 @@ int main(int argc, char **argv) {
       // TODO: Handle non okay requests better
       // until then, print the response
       cout << curlyFry->getResponse()->body.str() << endl;
-      notification->show();
+      if (notify) {
+        notification->show();
+      }
       return 1;
     }
   } catch (const Config::ConfigError &e) {
