@@ -114,7 +114,7 @@ sudo make uninstall
 ```bash
 # CWD: uploadr/
 # Pull recursively to keep our other important packages up-to-date
-git pull --recursive
+git pull --recurse-submodules
 # Delete the build directory. This isn't strictly necessary, but might prevent strange build issues.
 rm -rf build
 # If this fails, you might've ran the make command as root, simply run the command again but as root.
