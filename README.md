@@ -114,13 +114,13 @@ sudo make uninstall
 ```bash
 # CWD: uploadr/
 # Pull recursively to keep our other important packages up-to-date
-git pull --resursive
+git pull --recursive
 # Delete the build directory. This isn't strictly necessary, but might prevent strange build issues.
 rm -rf build
 # If this fails, you might've ran the make command as root, simply run the command again but as root.
 # Make a new clean build directory and enter it
 mkdir build && cd build
-# Configure cmake and have cmake build Makefiles
+# Configure cmake and have cmake build Makefiles (If you're on macOS use the build instructions for macOS)
 cmake ..
 # Build!
 make
