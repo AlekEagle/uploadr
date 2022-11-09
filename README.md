@@ -8,14 +8,12 @@ Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprec
 
 - KDE neon (It's essentially Ubuntu 22.04 LTS)
 - Arch Linux
+- macOS (Much more involved, and notifications do not work)
 
 ### Untested but should generally work with
 
 - Any Debian/Ubuntu based Linux distribution
 - Most UNIX systems
-- macOS (Much more involved, and notifications do not work)
-
-The only strict requirements is that you must be using X11 (Wayland is unsupported and won't be actively maintained by me, feel free to contribute though!)
 
 ## NOT Compatible With
 
@@ -51,6 +49,15 @@ sudo pacman -S curl jsoncpp libnotify libpng xorgproto libmagic cmake make git
 paru -S libcurlpp
 ```
 
+### macOS
+
+Install the XCode CLI tools, then install the necessary libraries from your favorite macOS package manager (Brew is recommended but others might have them too, simply under a different name.)
+
+```bash
+# We will be installing libnotify, but its only to get it to compile, it will not work to send notifications.
+brew install cmake libnotify libmagic curlpp
+```
+
 ## Building
 
 Clone the repository recursively, to get additional dependencies that we don't (and probably can't (unless you're an Arch user with the AUR (I'm looking at you random stranger using Arch))) need to install from package repositories, make a build directory, configure cmake, and build uploadr.
@@ -62,6 +69,17 @@ git clone --recursive https://github.com/AlekEagle/uploadr.git && cd uploadr
 mkdir build && cd build
 # Configure cmake and have cmake build Makefiles
 cmake ..
+# Build!
+make
+```
+
+HOWEVER, if you are building on macOS you need to get a little more involved. Use the above commands until you get to the step where we configure cmake, and use the ones below instead.
+
+```bash
+# Set our LIBRARY_PATH for make when we're linking the whole program together
+export LIBRARY_PATH="/usr/local/lib"
+# Cmake building and compiling for macOS
+cmake -DCMAKE_CXX_FLAGS="-I/usr/local/include" ..
 # Build!
 make
 ```
