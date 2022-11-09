@@ -13,7 +13,7 @@ Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprec
 
 - Any Debian/Ubuntu based Linux distribution
 - Most UNIX systems
-- macOS (maybe? you'd probably have to tweak some dependencies or something. Personally I wouldn't trust it being very stable)
+- macOS (maybe? notifications won't work and you'd probably have to tweak some dependencies or something. Personally I wouldn't trust it being very stable)
 
 The only strict requirements is that you must be using X11 (Wayland is unsupported and won't be actively maintained by me, feel free to contribute though!)
 
