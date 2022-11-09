@@ -384,11 +384,11 @@ int main(int argc, char **argv) {
       // Create a new notification to tell the user if the upload was
       // successful or not
       notification = new NotNotify::Notification();
-    }
 
-    notification->setTimeout(
-      config->get("notification")["timeout"].as<int>() * 1000
-    );
+      notification->setTimeout(
+        config->get("notification")["timeout"].as<int>() * 1000
+      );
+    }
 
     // Check if the response code is 2XX
     if (responseCode / 100 == 2) {
@@ -460,17 +460,17 @@ int main(int argc, char **argv) {
       if (!manageUrl.empty()) {
         cout << manageUrl << endl;
         if (notify) {
-        // If we have a notification object, we'll create a button to open the
-        // manage url
-        notification->addAction(
-          "open-manage", "Manage",
-          [](NotifyNotification *notification, char *action, void *data) {
-            std::string url = (char *)data;
-            std::string cmd = "xdg-open " + url + " > /dev/null 2>&1";
-            system(cmd.c_str());
-          },
-          (void *)manageUrl.c_str()
-        );
+          // If we have a notification object, we'll create a button to open the
+          // manage url
+          notification->addAction(
+            "open-manage", "Manage",
+            [](NotifyNotification *notification, char *action, void *data) {
+              std::string url = (char *)data;
+              std::string cmd = "xdg-open " + url + " > /dev/null 2>&1";
+              system(cmd.c_str());
+            },
+            (void *)manageUrl.c_str()
+          );
         }
       }
       if (!thumbnailUrl.empty()) {
