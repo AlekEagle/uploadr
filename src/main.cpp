@@ -459,6 +459,7 @@ int main(int argc, char **argv) {
       }
       if (!manageUrl.empty()) {
         cout << manageUrl << endl;
+        if (notify) {
         // If we have a notification object, we'll create a button to open the
         // manage url
         notification->addAction(
@@ -470,6 +471,7 @@ int main(int argc, char **argv) {
           },
           (void *)manageUrl.c_str()
         );
+        }
       }
       if (!thumbnailUrl.empty()) {
         cout << thumbnailUrl << endl;
