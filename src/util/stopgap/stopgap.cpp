@@ -41,9 +41,12 @@ StopgapFile Stopgap::createFile(std::string extension) {
 // StopgapFile: a temporary file created by Stopgap
 
 void StopgapFile::setExtension(std::string ext) {
-  std::filesystem::rename(
-    path, std::filesystem::path(path.c_str() + ext == "" ? ("") : ("." + ext))
-  );
+  std::filesystem::path newPath =
+    std::filesystem::path(path.c_str() + (ext == "" ? ("") : ("." + ext)));
+
+  std::filesystem::rename(path, newPath);
+
+  path = newPath;
 }
 
 void StopgapFile::pipe(std::ostream &stream) {
