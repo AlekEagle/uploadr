@@ -23,6 +23,8 @@ StopgapFile Stopgap::createFile() {
   return StopgapFile(path);
 }
 StopgapFile Stopgap::createFile(std::string extension) {
+  // Seed std::rand
+  std::srand(time(NULL));
   // Create a random filename for the file
   std::string filename = std::to_string(std::rand());
   // Create the path to the file
@@ -37,6 +39,12 @@ StopgapFile Stopgap::createFile(std::string extension) {
 }
 
 // StopgapFile: a temporary file created by Stopgap
+
+void StopgapFile::setExtension(std::string ext) {
+  std::filesystem::rename(
+    path, std::filesystem::path(path.c_str() + ext == "" ? ("") : ("." + ext))
+  );
+}
 
 void StopgapFile::pipe(std::ostream &stream) {
   // Open the file

@@ -2,3 +2,4 @@ autom4te.cache
 aclocal.m4
 .vscode
 build
+src/version.h

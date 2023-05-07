@@ -20,6 +20,8 @@ class StopgapFile {
       return path;
     }
 
+    void setExtension(std::string ext);
+
     void pipe(std::ostream &stream);
     void pipe(std::ofstream &stream);
     void pipe(std::ostringstream &stream);

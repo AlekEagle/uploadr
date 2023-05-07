@@ -7,6 +7,7 @@
 #include "util/pigeonhole/pigeonhole.hpp"
 #include "util/stopgap/stopgap.hpp"
 #include "util/syntactic/syntactic.hpp"
+#include "version.h"
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <curlpp/cURLpp.hpp>
@@ -19,7 +20,8 @@
 #include <unistd.h>
 
 const std::string HELP_MSG =
-  "Usage: uploadr [OPTIONS] [FILE|-]"
+  "Uploadr v" PROJECT_VER
+  "\nUsage: uploadr [OPTIONS] [FILE|-]"
   "\nSpecify a file to upload, use - to read from stdin, or don't specify "
   "anything to upload the clipboard contents."
   "\nOPTIONS:"
@@ -51,6 +53,15 @@ int main(int argc, char **argv) {
     if (args.getBool("h") || args.getBool("help")) {
       // Print the help message
       cout << HELP_MSG << endl;
+
+      // Exit
+      return 0;
+    }
+
+    // Check if the version flag was passed
+    if (args.getBool("v") || args.getBool("version")) {
+      // Print the version
+      cout << PROJECT_VER << endl;
 
       // Exit
       return 0;
@@ -151,12 +162,15 @@ int main(int argc, char **argv) {
       Clipboard::get(clipboardContents);
       // Write the clipboard contents to the stopgap file
       file.writeContents(clipboardContents);
+      std::string ext = Cookies::getExtension(clipboardContents);
       // Get the file extension from the clipboard contents
-      fnameOverride =
-        "clipboard-content." + Cookies::getExtension(clipboardContents);
+      fnameOverride = "clipboard-content." + ext;
       // If the extension is "???", we'll just use txt
       if (fnameOverride == "clipboard-content.???") {
         fnameOverride = "clipboard-content.txt";
+        file.setExtension("txt");
+      } else {
+        file.setExtension(ext);
       }
     } else { // Read from a file
       // If the user specified a file, use that
@@ -170,6 +184,7 @@ int main(int argc, char **argv) {
       file.pipe(std::ifstream(args.arguments[0], std::ios::binary));
       // and use the filename as the filename
       fnameOverride = std::filesystem::path(args.arguments[0]).filename();
+      file.setExtension(std::filesystem::path(args.arguments[0]).extension());
     }
 
     // Now that we have the uploader and the file info, we can get curlyfries
@@ -364,6 +379,9 @@ int main(int argc, char **argv) {
     for (const auto &header : headers.object_range()) {
       curlyFry->addHeader(header.key(), header.value().as_string());
     }
+
+    // Add the User-Agent header to the request
+    curlyFry->addHeader(string("User-Agent"), string("Uploadr " PROJECT_VER));
 
     // If the user want's notifications, we'll send them a notification
     if (notify) {

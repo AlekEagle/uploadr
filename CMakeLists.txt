@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # PROJECT
-project(uploadr)
+project(uploadr VERSION 1.0.1)
 
 # DEPENDENCY RESOLVERS
 find_package(PkgConfig REQUIRED)
@@ -28,6 +28,9 @@ file(GLOB_RECURSE UPLOADR_SOURCES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.cpp")
 
 # LIBRARIES
 
+# CURLPP
+add_subdirectory(${LIB_DIR}/curlpp)
+
 # CLIP
 set(CLIP_EXAMPLES OFF CACHE BOOL "Compile clip examples")
 set(CLIP_TESTS OFF CACHE BOOL "Compile clip tests")
@@ -48,6 +51,7 @@ add_executable(uploadr ${UPLOADR_SOURCES})
 # EXECUTABLE LINKING
 target_link_libraries(
   uploadr
+  curlpp
   clip
   pugixml
   cpp-base64
@@ -57,6 +61,9 @@ target_link_libraries(
   ${MAGIC_LIBRARIES}
   ${NOTIFY_LIBRARIES}
 )
+
+# CONFIGURE_FILE
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${SOURCE_DIR}/version.h)
 
 # EXECUTABLE INCLUDES
 target_include_directories(
@@ -68,6 +75,7 @@ target_include_directories(
   ${PNG_INCLUDE_DIRS}
   ${MAGIC_INCLUDE_DIRS}
   ${NOTIFY_INCLUDE_DIRS}
+  ${LIB_DIR}/curlpp/include
   ${LIB_DIR}/clip
   ${LIB_DIR}/jsoncons/include
   ${LIB_DIR}/pugixml/src
