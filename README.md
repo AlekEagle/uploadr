@@ -37,16 +37,13 @@ To build uploadr we first have to get everything ready. Let's install the build 
 ### Debian/Ubuntu Based Distros
 
 ```bash
-sudo apt install libcurlpp-dev libcurl4-openssl-dev libjsoncpp-dev libnotify-dev libpng-dev libx11-dev libmagic-dev cmake build-essential git
+sudo apt install libcurl4-openssl-dev libnotify-dev libpng-dev libx11-dev libmagic-dev cmake
 ```
 
 ### Arch Linux
 
 ```bash
-sudo pacman -S curl jsoncpp libnotify libpng xorgproto libmagic cmake make git
-# libcurlpp is not available in the official repos, so you'll have to get it from the AUR
-# using your favorite AUR helper, here's an example with paru:
-paru -S libcurlpp
+sudo pacman -S curl libnotify libpng xorgproto libmagic cmake make git
 ```
 
 ### macOS
@@ -55,7 +52,7 @@ Install the XCode CLI tools, then install the necessary libraries from your favo
 
 ```bash
 # We will be installing libnotify, but its only to get it to compile, it will not work to send notifications.
-brew install cmake libnotify libmagic curlpp
+brew install cmake libnotify libmagic
 ```
 
 ## Building

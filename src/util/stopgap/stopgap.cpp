@@ -3,10 +3,13 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <time.h>
 #include <vector>
 
 // Stopgap: a temporary file management system
 StopgapFile Stopgap::createFile() {
+  // Seed std::rand
+  std::srand(time(NULL));
   // Create a random filename for the file
   std::string filename = std::to_string(std::rand());
   // Create the path to the file

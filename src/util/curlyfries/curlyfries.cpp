@@ -11,7 +11,7 @@
 namespace curlyfries {
   CurlyFry::CurlyFry() {
     // Initialize curlpp
-    cURLpp::initialize();
+    cURLpp::initialize(CURL_GLOBAL_ALL);
     // Set the response stream
     request.setOpt(new cURLpp::Options::WriteStream(&response.body));
     // Set the response headers

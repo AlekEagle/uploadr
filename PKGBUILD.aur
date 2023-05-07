@@ -1,0 +1,51 @@
+pkgname='uploadr'
+pkgdesc='Uploadr is a simple CLI tool made to be a drop-in replacement for the now deprecated sharenix.'
+pkgver='0.1.0'
+pkgrel=1
+
+clipver='v1.5'
+cppbase64ver='V2.rc.08'
+jsonconsver='v0.169.0'
+pugixmlver='v1.13'
+
+
+url="https://github.com/AlekEagle/$pkgname"
+arch=('x86_64')
+source=(
+    "$pkgname-$pkgver.tar.gz::$url/archive/$pkgver.tar.gz"
+    'clip.tar.gz::https://github.com/dacap/clip/archive/$clipver.tar.gz'
+    'jsoncons.tar.gz::https://github.com/danielaparker/jsoncons/archive/$jsonconsver.tar.gz'
+    'pugixml.tar.gz::https://github.com/zeux/pugixml/archive/$pugixmlver.tar.gz'
+    'cpp-base64.tar.gz::https://github.com/ReneNyffenegger/cpp-base64/archive/cppbase64ver.tar.gz'
+)
+sha256sums=(
+    'c838d19a21d9bb6d8b1a350cd7c92e9ff6410ed1a78702417166db35af7a7f62'
+    '98ad945fec28cfbbe56c3ea05e2ba875bc4b6e6f0bfb6635c55bf5d3f8c09246'
+    'c2bc88427add913a34f1229bb73e815fa385bf164fcc774ff649e842db44e74f'
+    '9ce48b281806bb01260c9b78cdbeee165c026c984d12be8d4303b2ff8afbe2e1'
+    '4f1dc8eda384f490df598e8cd76a7afbade8ec675531bda5060c58eea64f97a7'
+)
+
+# idk ask alek which of these are makedeps lol
+depends=('curl' 'libnotify' 'libpng' 'xorgproto' 'libcurlpp')
+
+makedeps=('cmake')
+
+prepare() {
+    mv -T 'clip-$clipver' "$pkgname-$pkgver/lib/clip"
+    mv -T 'jsoncons-$jsonconsver' "$pkgname-$pkgver/lib/jsoncons"
+    mv -T 'pugixml-$pugixmlver' "$pkgname-$pkgver/lib/pugixml"
+    mv -T 'cpp-base64-$cppbase64ver' "$pkgname-$pkgver/lib/cpp-base64"
+}
+
+build() {
+    mkdir "$pkgname-$pkgver/build"
+    cd "$pkgname-$pkgver/build"
+    cmake -DCMAKE_BUILD_TYPE:STRING=Release ..
+    make
+}
+
+package() {
+    mkdir -p "$pkgdir/usr/local/bin"
+    mv "$pkgname-$pkgver/build/uploadr" "$pkgdir/usr/local/bin"
+}

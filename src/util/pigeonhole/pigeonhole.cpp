@@ -122,7 +122,7 @@ namespace Pigeonhole {
     std::string filename = timestamp + "." + extension;
 
     // Let's prepare to add the file to the history CSV file
-    std::filesystem::path path =
+    std::filesystem::path histCSVPath =
       std::filesystem::path(config["archive"]["histFile"].as_string());
     // Now, we can check if the file exists, and if it doesn't, we need to
     // create it
@@ -135,11 +135,11 @@ namespace Pigeonhole {
       file.close();
     }
     // Now, we can read the CSV file
-    std::ifstream inFile(path);
+    std::ifstream inCSVFile(histCSVPath);
     jsoncons::json history = jsoncons::csv::decode_csv<jsoncons::json>(
-      inFile, Pigeonhole::getCSVOptions()
+      inCSVFile, Pigeonhole::getCSVOptions()
     );
-    inFile.close();
+    inCSVFile.close();
     // Check if the history file has more than the maximum number of
     // entries specified in the config
     int maxEntries = config["archive"]["maxCount"].as<int>();
@@ -173,7 +173,7 @@ namespace Pigeonhole {
       std::filesystem::path(config["archive"]["path"].as_string()) / filename
     );
     // Write the history to the CSV file
-    std::ofstream outFile(path);
+    std::ofstream outFile(histCSVPath);
     outFile << os.str();
     outFile.close();
   }
