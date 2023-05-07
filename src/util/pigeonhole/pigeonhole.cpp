@@ -126,9 +126,9 @@ namespace Pigeonhole {
       std::filesystem::path(config["archive"]["histFile"].as_string());
     // Now, we can check if the file exists, and if it doesn't, we need to
     // create it
-    if (!std::filesystem::exists(path)) {
+    if (!std::filesystem::exists(histCSVPath)) {
       // We need to create the file
-      std::ofstream file(path);
+      std::ofstream file(histCSVPath);
       // And write the column names to it
       file << Pigeonhole::getCSVOptions().column_names();
       // And close the file
