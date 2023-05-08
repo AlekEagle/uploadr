@@ -13,7 +13,6 @@ find_package(PkgConfig REQUIRED)
 
 # DEPENDENCIES
 pkg_check_modules(NOTIFY REQUIRED libnotify)
-pkg_check_modules(CURL REQUIRED curlpp)
 pkg_check_modules(X11 REQUIRED x11)
 pkg_check_modules(PNG REQUIRED libpng)
 pkg_check_modules(MAGIC REQUIRED libmagic)
