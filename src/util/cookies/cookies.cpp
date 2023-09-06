@@ -53,7 +53,17 @@ namespace Cookies {
     magic_load(magic, NULL);
     string ext = magic_buffer(magic, buffer, size);
     magic_close(magic);
-    return ext;
+
+    // Check if the the function provided more than one valid extension
+    // (separated by a /)
+    size_t position = ext.find('/');
+    if (position != string::npos) {
+      // Return the first extension
+      return ext.substr(0, position);
+    } else {
+      // Return the extension
+      return ext;
+    }
   }
 
   string getExtension(vector<char> &buffer, int flags) {
@@ -70,7 +80,17 @@ namespace Cookies {
     stream.seekg(0, ios::beg);
     string ext = magic_buffer(magic, buffer.data(), buffer.size());
     magic_close(magic);
-    return ext;
+
+    // Check if the the function provided more than one valid extension
+    // (separated by a /)
+    size_t position = ext.find('/');
+    if (position != string::npos) {
+      // Return the first extension
+      return ext.substr(0, position);
+    } else {
+      // Return the extension
+      return ext;
+    }
   }
 
   string getExtension(const string &path, int flags) {
@@ -78,7 +98,17 @@ namespace Cookies {
     magic_load(magic, NULL);
     string ext = magic_file(magic, path.c_str());
     magic_close(magic);
-    return ext;
+
+    // Check if the the function provided more than one valid extension
+    // (separated by a /)
+    size_t position = ext.find('/');
+    if (position != string::npos) {
+      // Return the first extension
+      return ext.substr(0, position);
+    } else {
+      // Return the extension
+      return ext;
+    }
   }
 
   string getExtension(const fs::path &path, int flags) {
