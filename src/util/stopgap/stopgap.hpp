@@ -30,6 +30,9 @@ class StopgapFile {
     void pipe(const std::ifstream &stream);
     void pipe(const std::istringstream &stream);
 
+    // Test for a file extension
+    std::string testExtension();
+
     // Get the contents of the file as a char vector
     std::vector<char> getContents();
 

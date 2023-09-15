@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # PROJECT
-project(uploadr VERSION 1.0.1)
+project(uploadr VERSION 1.0.2)
 
 # DEPENDENCY RESOLVERS
 find_package(PkgConfig REQUIRED)

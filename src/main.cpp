@@ -147,6 +147,16 @@ int main(int argc, char **argv) {
       // Read the contents of stdin into the stopgap file
       file.pipe(std::cin);
 
+      // Test for a file extension
+      std::string ext = file.testExtension();
+      // If the extension is "???", we'll just use txt
+      if (ext == "???") {
+        ext = "txt";
+        file.setExtension("txt");
+      } else {
+        file.setExtension(ext);
+      }
+
     } else if (args.arguments[0] == "") { // Read from clipboard
       // Before we do anything, check if the clipboard actually has any data
       if (!Clipboard::has()) {

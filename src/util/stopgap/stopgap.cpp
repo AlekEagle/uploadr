@@ -1,4 +1,5 @@
 #include "stopgap.hpp"
+#include "../cookies/cookies.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -101,6 +102,16 @@ void StopgapFile::pipe(const std::istringstream &stream) {
   file << stream.rdbuf();
   // Close the file
   file.close();
+}
+
+// Test for a file extension
+std::string StopgapFile::testExtension() {
+  // Get the file contents
+  std::vector<char> contents = getContents();
+  // Get the file extension
+  std::string ext = Cookies::getExtension(contents);
+  // Return the file extension
+  return ext;
 }
 
 std::vector<char> StopgapFile::getContents() {
