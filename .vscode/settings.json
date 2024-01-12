@@ -1,4 +1,4 @@
 {
   "rust-analyzer.showUnlinkedFileNotification": false,
-  "cSpell.words": ["arboard", "cliargs", "serde"]
+  "cSpell.words": ["arboard", "cliargs", "serde", "uploaders"]
 }

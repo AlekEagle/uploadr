@@ -1,5 +1,6 @@
 [package]
 name = "uploadr"
+description = "Uploadr is a command line tool to upload files to the cloud."
 version = "2.0.0"
 edition = "2021"
 
@@ -14,3 +15,7 @@ curl = "0.4.44"
 serde_json = "1.0.111"
 serde = "1.0.195"
 clap = { version = "4.4.15", features = ["derive"] }
+open = "5.0.1"
+serde-xml-rs = "0.6.0"
+serde_json_path = "0.6.4"
+serde-csv-extra = "0.2.0"

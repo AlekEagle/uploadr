@@ -2,12 +2,24 @@ mod utils;
 use utils::config::Config;
 use clap::Parser;
 
+#[derive(Parser, Debug)]
+#[command(author = "Alek Evans", version = env!("CARGO_PKG_VERSION"), about = env!("CARGO_PKG_DESCRIPTION"))]
+pub struct Args {
+  /// The path to the config file to use.
+  #[clap(short, long)]
+  pub config_path: Option<String>,
+
+  /// The uploader to use.
+  #[clap(short, long)]
+  pub uploader: Option<String>,
+
+  /// Displays upload history.
+  #[clap(long)]
+  pub history: bool,
+}
+
 fn main() {
   let mut args: Args = Args::parse();
-  println!("Config path: {}", args.config_path.get_or_insert(Config::get_default_config_path()));
-  println!("Default uploader: {}", args.uploader.unwrap());
-  let config: Config = Config::new(None);
-  println!("Config path: {}", config.config_path);
-  println!("Default uploader: {}", config.config.defaultUploader);
-  println!("Notification enabled: {}", config.config.notification.enabled);
+  let config = Config::new(args.config_path.take(), args.uploader.take());
+  println!("{:?}", config);
 }
