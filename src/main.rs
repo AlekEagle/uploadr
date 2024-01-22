@@ -1,5 +1,6 @@
 mod utils;
 use utils::config::Config;
+use utils::history::HistoryManager;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -21,5 +22,23 @@ pub struct Args {
 fn main() {
   let mut args: Args = Args::parse();
   let config = Config::new(args.config_path.take(), args.uploader.take());
-  println!("{:?}", config);
+  let history_manager = HistoryManager::new(&config);
+  if args.history {
+    print_history(&config, history_manager);
+  }
+}
+
+fn print_history(config: &Config, mut history_manager: HistoryManager) -> () {
+  if config.data.archive.enabled {
+    if history_manager.load() {
+      let history = history_manager.list();
+      println!("File Name, URL, Manage URL, Thumbnail URL");
+      println!("----------------");
+      println!("{history}");
+    } else {
+      println!("No upload history found.");
+    }
+  } else {
+    println!("Upload history is disabled.");
+  }
 }

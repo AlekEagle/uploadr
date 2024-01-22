@@ -85,7 +85,7 @@ impl Config {
   }
 
   /// A static method to get the default config.
-  pub fn new(config_path: Option<String>, uploader: Option<String>) -> Config {
+  pub fn new(config_path: Option<String>, uploader: Option<String>) -> Self {
     // TODO: actually load the config.
     let config_path = config_path.map(|path| PathBuf::from(path)).unwrap_or(Config::get_default_config_path());
     let data = ConfigData::from_file(&config_path);
@@ -101,7 +101,7 @@ impl Config {
 
 impl ConfigData {
   /// A static method that returns default ConfigData.
-  pub fn default() -> ConfigData {
+  pub fn default() -> Self {
     return ConfigData {
       default_uploader: "imgur".to_owned(),
       notification: Notification {
@@ -120,7 +120,7 @@ impl ConfigData {
     };
   }
 
-  pub fn from_file(config_path: &PathBuf) -> ConfigData {
+  pub fn from_file(config_path: &PathBuf) -> Self {
     // Clone the path buf so we can modify it without affecting the original.
     let mut config_path = config_path.clone();
     // Append the config file name to the path.
@@ -154,7 +154,7 @@ impl ConfigData {
 
 impl UploaderData {
   /// A static method that returns default UploaderData. (An Imgur uploader config)
-  pub fn default() -> UploaderData {
+  pub fn default() -> Self {
     return UploaderData {
       request: UploaderRequest {
         url: "https://api.imgur.com/3/image".to_owned(),
@@ -165,7 +165,11 @@ impl UploaderData {
           map
         },
         body: Body {
-          multipart: None,
+          multipart: {
+            let mut map = HashMap::new();
+            map.insert("image".to_owned(), "!CONTENT!".to_owned());
+            Some(map)
+          },
         },
       },
       response: UploaderResponse {
@@ -176,7 +180,7 @@ impl UploaderData {
     };
   }
 
-  pub fn from_file(config_path: &PathBuf, uploader: &str) -> UploaderData {
+  pub fn from_file(config_path: &PathBuf, uploader: &str) -> Self {
     // Clone the path buf so we can modify it without affecting the original.
     let mut config_path = config_path.clone();
     // Append the config file name to the path.
