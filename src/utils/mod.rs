@@ -5,4 +5,8 @@ pub mod config;
 // Upload history module.
 pub mod history;
 // Curl logic module.
-pub mod curlyfries;
+// pub mod curlyfries;
+// Templating module.
+pub mod templator;
+// File logic module.
+pub mod file;

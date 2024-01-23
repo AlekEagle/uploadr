@@ -15,7 +15,7 @@
           "kind": "bin"
         }
       },
-      "args": [],
+      "args": ["--config", "~/balls"],
       "cwd": "${workspaceFolder}"
     },
     {

@@ -2,13 +2,14 @@ mod utils;
 use utils::config::Config;
 use utils::history::HistoryManager;
 use clap::Parser;
+use utils::templator::Templator;
 
 #[derive(Parser, Debug)]
 #[command(author = "Alek Evans", version = env!("CARGO_PKG_VERSION"), about = env!("CARGO_PKG_DESCRIPTION"))]
 pub struct Args {
   /// The path to the config file to use.
   #[clap(short, long)]
-  pub config_path: Option<String>,
+  pub config: Option<String>,
 
   /// The uploader to use.
   #[clap(short, long)]
@@ -21,11 +22,14 @@ pub struct Args {
 
 fn main() {
   let mut args: Args = Args::parse();
-  let config = Config::new(args.config_path.take(), args.uploader.take());
-  let history_manager = HistoryManager::new(&config);
+  let mut config = Config::new(args.config.take(), args.uploader.take());
+  let mut templator = Templator::new(&config);
+  let mut history_manager = HistoryManager::new(&config);
   if args.history {
     print_history(&config, history_manager);
   }
+
+  println!("{}", templator.format("{ env:{uploader:$.response.manage_url} }"));
 }
 
 fn print_history(config: &Config, mut history_manager: HistoryManager) -> () {

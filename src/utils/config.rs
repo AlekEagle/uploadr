@@ -70,7 +70,6 @@ pub struct Body {
 
 /// Struct for the response data.
 /// URL must be provided from the response.
-/// TODO: Implement support for more response types other than just JSON.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UploaderResponse {
   pub url: String,
@@ -84,10 +83,37 @@ impl Config {
     return PathBuf::from_iter(&[env::var("HOME").unwrap(), ".config".to_owned(), "uploadr".to_owned()]);
   }
 
+  pub fn resolve_path(path: &str) -> PathBuf {
+    let mut resolved_path: PathBuf;
+    // If the path is absolute, return it.
+    if PathBuf::from(path).is_absolute() {
+      return PathBuf::from(path);
+    } else {
+      // If the path starts with "~", resolve it.
+      if path.starts_with("~/") {
+        resolved_path = PathBuf::from(env::var("HOME").unwrap());
+        resolved_path.push(path.trim_start_matches("~/"));
+        return resolved_path;
+      } else {
+        // Otherwise, resolve it relative to the default config directory.
+        resolved_path = Config::get_default_config_path();
+        resolved_path.push(path);
+      }
+    }
+    // If the parent directory doesn't exist, panic.
+    if !resolved_path.parent().unwrap().exists() {
+      panic!("The parent directory of the path \"{}\" does not exist.", path);
+    }
+    // Return the resolved path.
+    return resolved_path;
+  }
+
   /// A static method to get the default config.
   pub fn new(config_path: Option<String>, uploader: Option<String>) -> Self {
-    // TODO: actually load the config.
-    let config_path = config_path.map(|path| PathBuf::from(path)).unwrap_or(Config::get_default_config_path());
+    let config_path = match config_path {
+      Some(config_path) => Config::resolve_path(&config_path),
+      None => Config::get_default_config_path(),
+    };
     let data = ConfigData::from_file(&config_path);
     let uploader = UploaderData::from_file(&config_path, &uploader.unwrap_or(data.default_uploader.clone()));
     let config = Config{
@@ -149,6 +175,10 @@ impl ConfigData {
 
   fn stringify(&self) -> String {
     return serde_json::to_string_pretty(&self).unwrap();
+  }
+
+  pub fn to_value(&self) -> serde_json::Value {
+    return serde_json::to_value(&self).unwrap();
   }
 }
 
@@ -212,6 +242,10 @@ impl UploaderData {
 
   fn stringify(&self) -> String {
     return serde_json::to_string_pretty(&self).unwrap();
+  }
+
+  pub fn to_value(&self) -> serde_json::Value {
+    return serde_json::to_value(&self).unwrap();
   }
 }
 

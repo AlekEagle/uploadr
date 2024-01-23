@@ -32,6 +32,28 @@ Previously written in C++, this is a rewrite in Rust. It's not as feature-comple
   - [x] Default target
   - [x] Generate default config file
   - [x] Multiple upload targets
+  - [ ] Templating for upload target configurations.
+    - [ ] File related templates
+      - [ ] File name
+      - [ ] File extension
+      - [ ] File size
+      - [ ] File MIME type
+      - [ ] File hash
+    - [x] Environment variable templates
+    - [ ] Response related templates
+      - [ ] Response body
+      - [ ] Response headers
+      - [ ] Response status code
+      - [ ] Response status message
+      - [ ] Response time
+      - [ ] Response URL
+    - [ ] Randomness related templates
+      - [ ] Random string
+      - [ ] Random number
+      - [ ] Random UUID
+      - [ ] Random hash
+    - [x] Config related templates
+    - [x] Uploader config related templates
 - [ ] Notifications stuff and things
   - [ ] Upload progress
   - [ ] Upload complete

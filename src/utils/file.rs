@@ -1,7 +1,5 @@
 use std::{io::Read, path::PathBuf};
-use curl::easy::Easy;
 use infer::Infer;
-use crate::utils::config::UploaderData;
 
 /// A File struct to hold the file data.
 pub struct File {
@@ -30,7 +28,7 @@ impl File {
     };
   }
 
-  pub fn from_file(path: &PathBuf) -> Self {
+  pub fn from_path(path: &PathBuf) -> Self {
     // Get the file name from the path.
     let name = path.file_name().unwrap().to_str().unwrap().to_owned();
     // Read the file into a buffer.
@@ -38,34 +36,5 @@ impl File {
     let mut buf = Vec::new();
     file.read_to_end(buf.as_mut()).unwrap();
     return File::new(&buf, Some(name));
-  }
-}
-
-pub struct CurlyFry<'a> {
-  pub easy: Easy,
-  pub uploader: &'a UploaderData,
-}
-
-impl<'a> CurlyFry<'a> {
-  pub fn new(uploader: &'a UploaderData) -> Self {
-    return CurlyFry {
-      easy: Easy::new(),
-      uploader,
-    };
-  }
-
-  fn choose_method(&mut self) -> () {
-    match self.uploader.request.method.as_str() {
-      "POST" => self.easy.post(true).unwrap(),
-      "PUT" => self.easy.put(true).unwrap(),
-      _ => panic!("Uploader config contains an invalid method. {}", self.uploader.request.method),
-    };
-  }
-
-  fn set_headers(&mut self) -> () {
-    let mut list = curl::easy::List::new();
-    for (key, value) in &self.uploader.request.headers {
-      list.append(&format!("{}: {}", key, value)).unwrap();
-    }
   }
 }
