@@ -32,19 +32,19 @@ pub struct Templator<'a> {
 
 impl<'a> Templator<'a> {
   pub fn new(config: &'a Config) -> Self {
-    return Templator { config, file: None, curlyfry: None };
+    Templator { config, file: None, curlyfry: None }
   }
 
-  pub fn set_file(&mut self, file: File) -> () {
+  pub fn set_file(&mut self, file: File) {
     self.file = Some(file);
   }
 
-  pub fn set_curlyfry(&mut self, curlyfry: &'a CurlyFry) -> () {
+  pub fn set_curlyfry(&mut self, curlyfry: &'a CurlyFry) {
     self.curlyfry = Some(curlyfry);
   }
 
   pub fn format(&mut self, template: &str) -> String {
-    return self.directive_iterator(template);
+    self.directive_iterator(template)
   }
 
   fn directive_iterator(&mut self, template: &str) -> String {
@@ -207,10 +207,10 @@ impl<'a> Templator<'a> {
       panic!("Unmatched directive start.");
     }
 
-    return result;
+    result
   }
   
-  fn handle_directive(&mut self, directive: &str, parameters: &Vec<String>) -> String {
+  fn handle_directive(&mut self, directive: &str, parameters: &[String]) -> String {
     // trim all whitespace from the directive name.
     let directive = directive.trim();
     // If the directive is empty...
@@ -219,7 +219,7 @@ impl<'a> Templator<'a> {
       panic!("Empty directive.");
     }
     // Trim all whitespace from the parameters.
-    let parameters: Vec<String> = parameters.iter().map(|parameter| self.directive_iterator(&parameter.trim().to_string())).collect();
+    let parameters: Vec<String> = parameters.iter().map(|parameter| self.directive_iterator(parameter.trim())).collect();
     match directive {
       "config" => {
         let config = &self.config.data.to_value();
@@ -227,7 +227,7 @@ impl<'a> Templator<'a> {
         let value = path.query(config).exactly_one();
         match value {
           Ok(value) => {
-            return value.to_string();
+            value.to_string()
           }
           Err(_) => {
             panic!("Invalid JSON path.");
@@ -240,36 +240,34 @@ impl<'a> Templator<'a> {
         let value = path.query(config).exactly_one();
         match value {
           Ok(value) => {
-            return value.to_string();
+            value.to_string()
           }
           Err(_) => {
             panic!("Invalid JSON path.");
           }
         }
       }
-      "env" => {
-        return std::env::var(parameters.first().unwrap()).expect("Invalid environment variable");
-      }
+      "env" => std::env::var(parameters.first().unwrap()).expect("Invalid environment variable"),
       "random" => {
         // Which random function to use.
         match parameters.first().unwrap().as_str() {
           "int" => {
             let min = parameters.get(1).unwrap().parse::<i64>().unwrap_or(1);
             let max = parameters.get(2).unwrap().parse::<i64>().unwrap_or(100);
-            return (rand::random::<i64>() % (max - min) + min).to_string();
+            (rand::random::<i64>() % (max - min) + min).to_string()
           }
           "float" => {
             let min = parameters.get(1).unwrap().parse::<f64>().unwrap_or(1.0);
             let max = parameters.get(2).unwrap().parse::<f64>().unwrap_or(100.0);
-            return (rand::random::<f64>() % (max - min) + min).to_string();
+            (rand::random::<f64>() % (max - min) + min).to_string()
           }
           "choice" => {
             // the rest of the parameters are the choices.
             let choices = &parameters[1..];
-            return choices[rand::random::<usize>() % choices.len()].clone();
+            choices[rand::random::<usize>() % choices.len()].clone()
           }
           "uuid" => {
-            return Uuid::new_v4().to_string();
+            Uuid::new_v4().to_string()
           }
           "string" => {
             let length = parameters.get(1).unwrap().parse::<usize>().unwrap_or(10);
@@ -281,7 +279,7 @@ impl<'a> Templator<'a> {
             for _ in 0..length {
               result.push(alphabet.chars().nth(rand::random::<usize>() % alphabet.len()).unwrap());
             }
-            return result;
+            result
           }
           _ => panic!("Unknown random function.")
         }
@@ -290,11 +288,11 @@ impl<'a> Templator<'a> {
         let curlyfry = self.curlyfry.expect("Use of response directive before response is available.");
         match parameters.first().unwrap().as_str() {
           "status_code" => {
-            return curlyfry.response.as_ref().unwrap().status_code.to_string();
+            curlyfry.response.as_ref().unwrap().status_code.to_string()
           }
           "headers" => {
             let headers = &curlyfry.response.as_ref().unwrap().headers;
-            return headers.get(&parameters.get(1).unwrap().to_lowercase()).expect("Header not found").to_string();
+            headers.get(&parameters.get(1).unwrap().to_lowercase()).expect("Header not found").to_string()
           }
           "body" => {
             let data = curlyfry.response.as_ref().unwrap().body.clone();
@@ -303,7 +301,7 @@ impl<'a> Templator<'a> {
             let value = path.query(&res_json).exactly_one();
             match value {
               Ok(value) => {
-                return value.to_string();
+                value.to_string()
               }
               Err(_) => {
                 panic!("Invalid JSON path.");

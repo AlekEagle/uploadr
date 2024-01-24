@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::io::Write;
+use std::path::Path;
 use std::path::PathBuf;
 use std::fs::*;
 use std::env;
@@ -84,7 +85,7 @@ pub struct UploaderResponse {
 impl Config {
   /// A static method to get the default config directory.
   pub fn get_default_config_path() -> PathBuf {
-    return PathBuf::from_iter(&[env::var("HOME").unwrap(), ".config".to_owned(), "uploadr".to_owned()]);
+     PathBuf::from_iter(&[env::var("HOME").unwrap(), ".config".to_owned(), "uploadr".to_owned()])
   }
 
   pub fn resolve_path(path: &str) -> PathBuf {
@@ -109,7 +110,7 @@ impl Config {
       panic!("The parent directory of the path \"{}\" does not exist.", path);
     }
     // Return the resolved path.
-    return resolved_path;
+    resolved_path
   }
 
   /// A static method to get the default config.
@@ -120,19 +121,18 @@ impl Config {
     };
     let data = ConfigData::from_file(&config_path);
     let uploader = UploaderData::from_file(&config_path, &uploader.unwrap_or(data.default_uploader.clone()));
-    let config = Config{
+    Config {
       config_path,
       data,
       uploader,
-    };
-    return config;
+    }
   }
 }
 
 impl ConfigData {
   /// A static method that returns default ConfigData.
   pub fn default() -> Self {
-    return ConfigData {
+    ConfigData {
       default_uploader: "imgur".to_owned(),
       notification: Notification {
         enabled: true,
@@ -147,12 +147,12 @@ impl ConfigData {
         read_only: false,
         text_only: false,
       },
-    };
+    }
   }
 
-  pub fn from_file(config_path: &PathBuf) -> Self {
+  pub fn from_file(config_path: &Path) -> Self {
     // Clone the path buf so we can modify it without affecting the original.
-    let mut config_path = config_path.clone();
+    let mut config_path = config_path.to_path_buf();
     // Append the config file name to the path.
     config_path.push("config.json");
     // Create the config file if it doesn't exist.
@@ -164,32 +164,32 @@ impl ConfigData {
     let file = File::open(config_path).unwrap();
     // Read from reader.
     match serde_json::from_reader(file) {
-      Ok(config) => return config,
+      Ok(config) => config,
       Err(_) => {
         panic!("The config file is invalid. Please fix it or delete it and run the program again.");
       }
     }
   }
 
-  fn save(&self, path: &PathBuf) -> () {
-    let mut file = File::create(path.clone()).unwrap();
+  fn save(&self, path: &Path) {
+    let mut file = File::create(path).unwrap();
     let config_json = self.stringify();
     file.write_all(config_json.as_bytes()).unwrap();
   }
 
   fn stringify(&self) -> String {
-    return serde_json::to_string_pretty(&self).unwrap();
+    serde_json::to_string_pretty(&self).unwrap()
   }
 
   pub fn to_value(&self) -> serde_json::Value {
-    return serde_json::to_value(&self).unwrap();
+    serde_json::to_value(self).unwrap()
   }
 }
 
 impl UploaderData {
   /// A static method that returns default UploaderData. (An Imgur uploader config)
   pub fn default() -> Self {
-    return UploaderData {
+    UploaderData {
       request: UploaderRequest {
         url: "https://api.imgur.com/3/image".to_owned(),
         method: "POST".to_owned(),
@@ -209,12 +209,12 @@ impl UploaderData {
         manage_url: None,
         thumbnail_url: None,
       },
-    };
+    }
   }
 
-  pub fn from_file(config_path: &PathBuf, uploader: &str) -> Self {
+  pub fn from_file(config_path: &Path, uploader: &str) -> Self {
     // Clone the path buf so we can modify it without affecting the original.
-    let mut config_path = config_path.clone();
+    let mut config_path = config_path.to_path_buf();
     // Append the config file name to the path.
     config_path.push(format!("{}.uploader", uploader));
     // Create the "imgur.uploader" file if it doesn't exist. 
@@ -229,30 +229,30 @@ impl UploaderData {
     let file = File::open(config_path).unwrap();
     // Read from reader.
     match serde_json::from_reader(file) {
-      Ok(config) => return config,
+      Ok(config) => config,
       Err(_) => {
         panic!("The uploader {} is invalid. Please fix it or delete it and run the program again.", uploader);
       }
     }
   }
 
-  fn save(&self, path: &PathBuf) -> () {
-    let mut file = File::create(path.clone()).unwrap();
+  fn save(&self, path: &Path) {
+    let mut file = File::create(path).unwrap();
     let config_json = self.stringify();
     file.write_all(config_json.as_bytes()).unwrap();
   }
 
   fn stringify(&self) -> String {
-    return serde_json::to_string_pretty(&self).unwrap();
+    serde_json::to_string_pretty(&self).unwrap()
   }
 
   pub fn to_value(&self) -> serde_json::Value {
-    return serde_json::to_value(&self).unwrap();
+    serde_json::to_value(self).unwrap()
   }
 }
 
-fn create_config_dir(config_path: &PathBuf) -> () {
-  let mut config_path = config_path.clone();
+fn create_config_dir(config_path: &Path) {
+  let mut config_path = config_path.to_path_buf();
   config_path.pop();
   create_dir_all(config_path).unwrap();
 }

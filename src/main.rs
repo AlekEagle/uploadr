@@ -62,7 +62,7 @@ fn main() {
   }
 }
 
-fn print_history(config: &Config, mut history_manager: HistoryManager) -> () {
+fn print_history(config: &Config, mut history_manager: HistoryManager) {
   if config.data.archive.enabled {
     if history_manager.load() {
       let history = history_manager.list();

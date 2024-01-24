@@ -29,10 +29,10 @@ impl HistoryManager {
     if !history_dir.exists() {
       create_dir_all(history_dir).unwrap();
     }
-    return HistoryManager {
+    HistoryManager {
       history: Vec::new(),
       history_path,
-    };
+    }
   }
 
   pub fn load(&mut self) -> bool {
@@ -43,13 +43,13 @@ impl HistoryManager {
         let record: History = result.unwrap();
         self.history.push(record);
       }
-      return true;
+       true
     } else {
-      return false;
+      false
     }
   }
 
-  pub fn save(&self) -> () {
+  pub fn save(&self) {
     let history_file = self.history_path.clone().join("history.csv");
     let mut writer = csv::Writer::from_path(history_file).unwrap();
     for record in &self.history {
@@ -59,9 +59,9 @@ impl HistoryManager {
   }
 
   // Take a file buffer, pertinent URLs and commit them to the history.
-  pub fn add(&mut self, buf: &[u8], url: String, manage_url: Option<String>, thumbnail_url: Option<String>) -> () {
+  pub fn add(&mut self, buf: &[u8], url: String, manage_url: Option<String>, thumbnail_url: Option<String>) {
     // Infer the file extension from the buffer
-    let extension = match infer::Infer::new().get(&buf) {
+    let extension = match infer::Infer::new().get(buf) {
       Some(result) => result.extension(),
       None => "bin",
     };
@@ -93,7 +93,7 @@ impl HistoryManager {
     }
     // Remove the trailing newline.
     output.pop();
-    return output;
+    output
   }
 
 }

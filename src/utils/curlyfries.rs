@@ -23,33 +23,33 @@ impl CurlyFry {
   pub fn new() -> Self {
     let mut easy = Easy::new();
     easy.useragent(format!("Uploadr/{}", env!("CARGO_PKG_VERSION")).as_str()).unwrap();
-    return CurlyFry {
+    CurlyFry {
       easy,
       url: String::new(),
       method: String::new(),
       headers: HashMap::new(),
       file: File::new(&[], None),
       response: None,
-    };
+    }
   }
 
-  pub fn set_url(&mut self, url: String) -> () {
+  pub fn set_url(&mut self, url: String) {
     self.url = url;
   }
 
-  pub fn set_method(&mut self, method: String) -> () {
+  pub fn set_method(&mut self, method: String) {
     self.method = method;
   }
 
-  pub fn set_headers(&mut self, headers: HashMap<String, String>) -> () {
+  pub fn set_headers(&mut self, headers: HashMap<String, String>) {
     self.headers = headers;
   }
 
-  pub fn set_file(&mut self, file: File) -> () {
+  pub fn set_file(&mut self, file: File) {
     self.file = file;
   }
 
-  pub fn execute(&mut self, config: &Config) -> () {
+  pub fn execute(&mut self, config: &Config) {
     self.easy.url(&self.url).unwrap();
     self.easy.custom_request(&self.method).unwrap();
     
@@ -94,7 +94,7 @@ impl CurlyFry {
       }).unwrap();
       transfer.header_function(|data| {
         let header = String::from_utf8_lossy(data).to_string();
-        if header.find(": ").is_none() {
+        if !header.contains(": ") {
           return true;
         }
         let mut parts = header.splitn(2, ": ");

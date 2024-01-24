@@ -12,7 +12,7 @@ pub struct File {
 
 impl File {
   pub fn new(buf: &[u8], name: Option<String>) -> Self {
-    let infer = Infer::new().get(&buf);
+    let infer = Infer::new().get(buf);
     let mime = match infer {
       Some(infer) => infer.mime_type().to_owned(),
       None => "application/octet-stream".to_owned(),
@@ -21,18 +21,18 @@ impl File {
       Some(infer) => infer.extension().to_owned(),
       None => "bin".to_owned(),
     };
-    return File {
+    File {
       name,
       buffer: buf.to_vec(),
       mime,
       ext,
-    };
+    }
   }
 
   pub fn from_stdin() -> Self {
     let mut buf = Vec::new();
     std::io::stdin().read_to_end(buf.as_mut()).unwrap();
-    return File::new(&buf, None);
+    File::new(&buf, None)
   }
 
   pub fn from_path(path: &PathBuf) -> Self {
@@ -42,18 +42,18 @@ impl File {
     let mut file = std::fs::File::open(path).unwrap();
     let mut buf = Vec::new();
     file.read_to_end(buf.as_mut()).unwrap();
-    return File::new(&buf, Some(name));
+    File::new(&buf, Some(name))
   }
 
-  pub fn override_name(&mut self, name: Option<String>) -> () {
+  pub fn override_name(&mut self, name: Option<String>) {
     self.name = name;
   }
 
-  pub fn override_ext(&mut self, ext: String) -> () {
+  pub fn override_ext(&mut self, ext: String) {
     self.ext = ext;
   }
 
-  pub fn override_mime(&mut self, mime: String) -> () {
+  pub fn override_mime(&mut self, mime: String) {
     self.mime = mime;
   }
 }
