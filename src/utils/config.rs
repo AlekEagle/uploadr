@@ -68,8 +68,6 @@ pub enum Body {
   Raw,
   MultipartFormData {
     field: String,
-    filename: Option<String>,
-    mime: Option<String>,
   },
 }
 
@@ -200,8 +198,6 @@ impl UploaderData {
         },
         body: Body::MultipartFormData {
           field: "image".to_owned(),
-          filename: None,
-          mime: None,
         },
       },
       response: UploaderResponse {

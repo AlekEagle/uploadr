@@ -23,3 +23,5 @@ chrono = "0.4.31"
 infer = "0.15.0"
 rand = "0.8.5"
 uuid = { version = "1.7.0", features = ["v4"] }
+atty = "0.2.14"
+image = "0.24.8"

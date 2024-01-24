@@ -59,20 +59,16 @@ impl HistoryManager {
   }
 
   // Take a file buffer, pertinent URLs and commit them to the history.
-  pub fn add(&mut self, buf: &[u8], url: String, manage_url: Option<String>, thumbnail_url: Option<String>) {
-    // Infer the file extension from the buffer
-    let extension = match infer::Infer::new().get(buf) {
-      Some(result) => result.extension(),
-      None => "bin",
-    };
+  pub fn add(&mut self, file_buf: &super::file::File, url: String, manage_url: Option<String>, thumbnail_url: Option<String>) {
+    
     // Get the current time. This will be used as the filename.
     let time_str = Local::now().format("%Y-%m-%d %H-%M-%S").to_string();
-    let file_name = format!("{}.{}", time_str, extension);
+    let file_name = format!("{}.{}", time_str, file_buf.ext);
     // Create the file path.
     let file_path = self.history_path.clone().join("uploads").join(&file_name);
     // Write the file.
     let mut file = File::create(file_path).unwrap();
-    file.write_all(buf).unwrap();
+    file.write_all(&file_buf.buffer).unwrap();
     // Create the history record.
     let history_record = History {
       file_name,

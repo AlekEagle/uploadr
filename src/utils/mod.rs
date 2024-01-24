@@ -10,3 +10,5 @@ pub mod curlyfries;
 pub mod templator;
 // File logic module.
 pub mod file;
+// Clipboard logic module.
+pub mod clippy;

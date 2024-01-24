@@ -4,25 +4,25 @@ use infer::Infer;
 /// A File struct to hold the file data.
 #[derive(Debug, Clone)]
 pub struct File {
-  pub name: Option<String>,
+  pub name: String,
   pub buffer: Vec<u8>,
   pub mime: String,
   pub ext: String,
 }
 
 impl File {
-  pub fn new(buf: &[u8], name: Option<String>) -> Self {
+  pub fn new(buf: &[u8], name: String) -> Self {
     let infer = Infer::new().get(buf);
     let mime = match infer {
       Some(infer) => infer.mime_type().to_owned(),
-      None => "application/octet-stream".to_owned(),
+      None => if buf.is_ascii() { "text/plain".to_owned() } else { "application/octet-stream".to_owned() },
     };
     let ext = match infer {
       Some(infer) => infer.extension().to_owned(),
-      None => "bin".to_owned(),
+      None => if mime == "text/plain" { "txt".to_owned() } else { "bin".to_owned() },
     };
     File {
-      name,
+      name: format!("{}.{}", name, ext),
       buffer: buf.to_vec(),
       mime,
       ext,
@@ -30,9 +30,13 @@ impl File {
   }
 
   pub fn from_stdin() -> Self {
+    // Check if stdin is a terminal.
+    if atty::is(atty::Stream::Stdin) {
+      panic!("No file specified and stdin is interactive.");
+    }
     let mut buf = Vec::new();
     std::io::stdin().read_to_end(buf.as_mut()).unwrap();
-    File::new(&buf, None)
+    File::new(&buf, "stdin".to_owned())
   }
 
   pub fn from_path(path: &PathBuf) -> Self {
@@ -42,15 +46,13 @@ impl File {
     let mut file = std::fs::File::open(path).unwrap();
     let mut buf = Vec::new();
     file.read_to_end(buf.as_mut()).unwrap();
-    File::new(&buf, Some(name))
+    File::new(&buf, name)
   }
 
-  pub fn override_name(&mut self, name: Option<String>) {
+  pub fn override_name(&mut self, name: String) {
     self.name = name;
-  }
-
-  pub fn override_ext(&mut self, ext: String) {
-    self.ext = ext;
+    // Get the file extension from the name.
+    self.ext = PathBuf::from(&self.name).extension().unwrap().to_str().unwrap().to_owned();
   }
 
   pub fn override_mime(&mut self, mime: String) {

@@ -290,25 +290,62 @@ impl<'a> Templator<'a> {
           "status_code" => {
             curlyfry.response.as_ref().unwrap().status_code.to_string()
           }
+          "url" => {
+            curlyfry.response.as_ref().unwrap().url.clone()
+          }
           "headers" => {
             let headers = &curlyfry.response.as_ref().unwrap().headers;
             headers.get(&parameters.get(1).unwrap().to_lowercase()).expect("Header not found").to_string()
           }
           "body" => {
-            let data = curlyfry.response.as_ref().unwrap().body.clone();
-            let path = JsonPath::parse(parameters.get(1).unwrap()).expect("Invalid JSON path");
-            let res_json = serde_json::from_str(&data).expect("Body is not valid JSON");
-            let value = path.query(&res_json).exactly_one();
-            match value {
-              Ok(value) => {
-                value.to_string()
+            match parameters.get(1).unwrap().as_str() {
+              "json" => {
+                let json = serde_json::from_str(&curlyfry.response.as_ref().unwrap().body).expect("Invalid JSON");
+                let path = JsonPath::parse(parameters.get(2).unwrap()).expect("Invalid JSON path");
+                let value = path.query(&json).exactly_one();
+                match value {
+                  Ok(value) => {
+                    value.as_str().unwrap().to_string()
+                  }
+                  Err(_) => {
+                    panic!("Invalid JSON path.");
+                  }
+                }
               }
-              Err(_) => {
-                panic!("Invalid JSON path.");
-              }
+              _ => panic!("Unknown body type.")
             }
           }
           _ => panic!("Unknown response function.")
+        }
+      }
+      // Alias for response:body;json
+      "json" => {
+        let curlyfry = self.curlyfry.expect("Use of json directive before response is available.");
+        let json = serde_json::from_str(&curlyfry.response.as_ref().unwrap().body).expect("Invalid JSON");
+        let path = JsonPath::parse(parameters.first().unwrap()).expect("Invalid JSON path");
+        let value = path.query(&json).exactly_one();
+        match value {
+          Ok(value) => {
+            value.as_str().unwrap().to_string()
+          }
+          Err(_) => {
+            panic!("Invalid JSON path.");
+          }
+        }
+      }
+      "file" => {
+        let file = self.file.as_ref().expect("Use of file directive before file is available.");
+        match parameters.first().unwrap().as_str() {
+          "name" => {
+            file.name.clone()
+          }
+          "mime" => {
+            file.mime.clone()
+          }
+          "size" => {
+            file.buffer.len().to_string()
+          }
+          _ => panic!("Unknown file function.")
         }
       }
       _ => panic!("Unknown directive: {}", directive),

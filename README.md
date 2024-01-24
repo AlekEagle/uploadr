@@ -13,47 +13,40 @@ Previously written in C++, this is a rewrite in Rust. It's not as feature-comple
   - [x] Configurable HTTP request headers
   - [x] Configurable HTTP request body
     - [x] multipart/form-data
-    - [ ] application/x-www-form-urlencoded
-    - [ ] application/json
-    - [ ] text/plain
-    - [ ] application/octet-stream
+    - [x] application/octet-stream
   - [x] Response Parsing
     - [x] JSON
     - [ ] XML
     - [ ] URL-encoded
     - [ ] Reg-exp matching
-- [ ] Clipboard stuff and things
-  - [ ] Copy to clipboard
-  - [ ] Upload from clipboard
-    - [ ] Binary data (images, etc.)
-    - [ ] Text data
-    - [ ] File paths (file://, absolute paths)
+- [x] Clipboard stuff and things
+  - [x] Copy to clipboard
+  - [x] Upload from clipboard
+    - [x] Binary data (images, etc.)
+    - [x] Text data
+    - [ ] File paths (file://, absolute paths) (arboard is currently very restrictive about the types of data it supports, and on some DEs, copying a file does not copy a file:// URL in text/plain format, so this is not currently possible)
 - [x] Configuration stuff and things
   - [x] Default target
   - [x] Generate default config file
   - [x] Multiple upload targets
-  - [ ] Templating for upload target configurations.
-    - [ ] File related templates
-      - [ ] File name
-      - [ ] File extension
-      - [ ] File size
-      - [ ] File MIME type
-      - [ ] File hash
+  - [x] Templating for upload target configurations.
+    - [x] File related templates
+      - [x] File name
+      - [x] File extension
+      - [x] File size
+      - [x] File MIME type
     - [x] Environment variable templates
-    - [ ] Response related templates
+    - [x] Response related templates
       - [x] Response body
-      - [ ] Response headers
-      - [ ] Response status code
-      - [ ] Response status message
-      - [ ] Response time
-      - [ ] Response URL
-    - [ ] Randomness related templates
+      - [x] Response headers
+      - [x] Response status code
+      - [x] Response URL
+    - [x] Randomness related templates
       - [x] Random string
       - [x] Random number
         - [x] Integer
         - [x] Float
       - [x] Random UUID
-      - [ ] Random hash
       - [x] Random choice
     - [x] Config related templates
     - [x] Uploader config related templates

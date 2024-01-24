@@ -6,6 +6,7 @@ use super::config::{Body, Config};
 
 pub struct Response {
   pub status_code: u32,
+  pub url: String,
   pub headers: HashMap<String, String>,
   pub body: String,
 }
@@ -22,13 +23,14 @@ pub struct CurlyFry {
 impl CurlyFry {
   pub fn new() -> Self {
     let mut easy = Easy::new();
+    easy.follow_location(true).unwrap();
     easy.useragent(format!("Uploadr/{}", env!("CARGO_PKG_VERSION")).as_str()).unwrap();
     CurlyFry {
       easy,
       url: String::new(),
       method: String::new(),
       headers: HashMap::new(),
-      file: File::new(&[], None),
+      file: File::new(&[], "This will be overridden".to_owned()),
       response: None,
     }
   }
@@ -54,18 +56,12 @@ impl CurlyFry {
     self.easy.custom_request(&self.method).unwrap();
     
     match &config.uploader.request.body {
-      Body::MultipartFormData { field, filename, mime } => {
+      Body::MultipartFormData { field } => {
         let mut form = curl::easy::Form::new();
         let mut part = form.part(field.as_str());
-        let filename = match filename {
-          Some(filename) => filename,
-          None => self.file.name.as_ref().unwrap(),
-        };
-        let mime = match mime {
-          Some(mime) => mime,
-          None => self.file.mime.as_str(),
-        };
-        part.buffer(filename, self.file.buffer.clone());
+        let filename = self.file.name.clone();
+        let mime = self.file.mime.as_str();
+        part.buffer(&filename, self.file.buffer.clone());
         part.content_type(mime);
         part.add().unwrap();
         self.easy.httppost(form).unwrap();
@@ -106,9 +102,11 @@ impl CurlyFry {
       transfer.perform().unwrap();
     }
     let response_code = self.easy.response_code().unwrap();
+    let response_url = self.easy.effective_url().unwrap();
 
     self.response = Some(Response {
       status_code: response_code,
+      url: response_url.unwrap().to_string(),
       headers: response_headers,
       body: String::from_utf8_lossy(&response_body).to_string(),
     });
