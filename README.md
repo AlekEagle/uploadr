@@ -41,17 +41,20 @@ Previously written in C++, this is a rewrite in Rust. It's not as feature-comple
       - [ ] File hash
     - [x] Environment variable templates
     - [ ] Response related templates
-      - [ ] Response body
+      - [x] Response body
       - [ ] Response headers
       - [ ] Response status code
       - [ ] Response status message
       - [ ] Response time
       - [ ] Response URL
     - [ ] Randomness related templates
-      - [ ] Random string
-      - [ ] Random number
-      - [ ] Random UUID
+      - [x] Random string
+      - [x] Random number
+        - [x] Integer
+        - [x] Float
+      - [x] Random UUID
       - [ ] Random hash
+      - [x] Random choice
     - [x] Config related templates
     - [x] Uploader config related templates
 - [ ] Notifications stuff and things

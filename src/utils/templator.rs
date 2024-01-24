@@ -1,6 +1,10 @@
 use serde_json_path::JsonPath;
 use crate::utils::config::Config;
 use crate::utils::file::File;
+use crate::utils::curlyfries::CurlyFry;
+use rand;
+use uuid::Uuid;
+
 
 const DIRECTIVE_START: char = '{';
 const DIRECTIVE_END: char = '}';
@@ -22,17 +26,21 @@ enum DirectiveState {
 
 pub struct Templator<'a> {
   pub config: &'a Config,
-  pub file: Option<&'a File>,
-  // TODO: Add Request and Response data for templating.
+  pub file: Option<File>,
+  pub curlyfry: Option<&'a CurlyFry>,
 }
 
 impl<'a> Templator<'a> {
   pub fn new(config: &'a Config) -> Self {
-    return Templator { config, file: None };
+    return Templator { config, file: None, curlyfry: None };
   }
 
-  pub fn set_file(&mut self, file: &'a File) -> () {
+  pub fn set_file(&mut self, file: File) -> () {
     self.file = Some(file);
+  }
+
+  pub fn set_curlyfry(&mut self, curlyfry: &'a CurlyFry) -> () {
+    self.curlyfry = Some(curlyfry);
   }
 
   pub fn format(&mut self, template: &str) -> String {
@@ -212,15 +220,14 @@ impl<'a> Templator<'a> {
     }
     // Trim all whitespace from the parameters.
     let parameters: Vec<String> = parameters.iter().map(|parameter| self.directive_iterator(&parameter.trim().to_string())).collect();
-    let mut result = String::new();
     match directive {
       "config" => {
         let config = &self.config.data.to_value();
-        let path = JsonPath::parse(parameters.first().unwrap()).expect("Invalid JSON path.");
+        let path = JsonPath::parse(parameters.first().unwrap()).expect("Invalid JSON path");
         let value = path.query(config).exactly_one();
         match value {
           Ok(value) => {
-            result.push_str(value.as_str().unwrap());
+            return value.to_string();
           }
           Err(_) => {
             panic!("Invalid JSON path.");
@@ -229,11 +236,11 @@ impl<'a> Templator<'a> {
       }
       "uploader" => {
         let config = &self.config.uploader.to_value();
-        let path = JsonPath::parse(parameters.first().unwrap()).expect("Invalid JSON path.");
+        let path = JsonPath::parse(parameters.first().unwrap()).expect("Invalid JSON path");
         let value = path.query(config).exactly_one();
         match value {
           Ok(value) => {
-            result.push_str(value.as_str().unwrap());
+            return value.to_string();
           }
           Err(_) => {
             panic!("Invalid JSON path.");
@@ -241,10 +248,72 @@ impl<'a> Templator<'a> {
         }
       }
       "env" => {
-        result.push_str(std::env::var(parameters.first().unwrap()).expect("Invalid environment variable.").as_str());
+        return std::env::var(parameters.first().unwrap()).expect("Invalid environment variable");
+      }
+      "random" => {
+        // Which random function to use.
+        match parameters.first().unwrap().as_str() {
+          "int" => {
+            let min = parameters.get(1).unwrap().parse::<i64>().unwrap_or(1);
+            let max = parameters.get(2).unwrap().parse::<i64>().unwrap_or(100);
+            return (rand::random::<i64>() % (max - min) + min).to_string();
+          }
+          "float" => {
+            let min = parameters.get(1).unwrap().parse::<f64>().unwrap_or(1.0);
+            let max = parameters.get(2).unwrap().parse::<f64>().unwrap_or(100.0);
+            return (rand::random::<f64>() % (max - min) + min).to_string();
+          }
+          "choice" => {
+            // the rest of the parameters are the choices.
+            let choices = &parameters[1..];
+            return choices[rand::random::<usize>() % choices.len()].clone();
+          }
+          "uuid" => {
+            return Uuid::new_v4().to_string();
+          }
+          "string" => {
+            let length = parameters.get(1).unwrap().parse::<usize>().unwrap_or(10);
+            let alphabet = {
+              let default_alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".to_string();
+              parameters.get(2).unwrap_or(&default_alphabet).to_string()
+            };
+            let mut result = String::new();
+            for _ in 0..length {
+              result.push(alphabet.chars().nth(rand::random::<usize>() % alphabet.len()).unwrap());
+            }
+            return result;
+          }
+          _ => panic!("Unknown random function.")
+        }
+      }
+      "response" => {
+        let curlyfry = self.curlyfry.expect("Use of response directive before response is available.");
+        match parameters.first().unwrap().as_str() {
+          "status_code" => {
+            return curlyfry.response.as_ref().unwrap().status_code.to_string();
+          }
+          "headers" => {
+            let headers = &curlyfry.response.as_ref().unwrap().headers;
+            return headers.get(&parameters.get(1).unwrap().to_lowercase()).expect("Header not found").to_string();
+          }
+          "body" => {
+            let data = curlyfry.response.as_ref().unwrap().body.clone();
+            let path = JsonPath::parse(parameters.get(1).unwrap()).expect("Invalid JSON path");
+            let res_json = serde_json::from_str(&data).expect("Body is not valid JSON");
+            let value = path.query(&res_json).exactly_one();
+            match value {
+              Ok(value) => {
+                return value.to_string();
+              }
+              Err(_) => {
+                panic!("Invalid JSON path.");
+              }
+            }
+          }
+          _ => panic!("Unknown response function.")
+        }
       }
       _ => panic!("Unknown directive: {}", directive),
     }
-    return result;
   }
 }

@@ -2,6 +2,7 @@ use std::{io::Read, path::PathBuf};
 use infer::Infer;
 
 /// A File struct to hold the file data.
+#[derive(Debug, Clone)]
 pub struct File {
   pub name: Option<String>,
   pub buffer: Vec<u8>,
@@ -28,6 +29,12 @@ impl File {
     };
   }
 
+  pub fn from_stdin() -> Self {
+    let mut buf = Vec::new();
+    std::io::stdin().read_to_end(buf.as_mut()).unwrap();
+    return File::new(&buf, None);
+  }
+
   pub fn from_path(path: &PathBuf) -> Self {
     // Get the file name from the path.
     let name = path.file_name().unwrap().to_str().unwrap().to_owned();
@@ -36,5 +43,17 @@ impl File {
     let mut buf = Vec::new();
     file.read_to_end(buf.as_mut()).unwrap();
     return File::new(&buf, Some(name));
+  }
+
+  pub fn override_name(&mut self, name: Option<String>) -> () {
+    self.name = name;
+  }
+
+  pub fn override_ext(&mut self, ext: String) -> () {
+    self.ext = ext;
+  }
+
+  pub fn override_mime(&mut self, mime: String) -> () {
+    self.mime = mime;
   }
 }

@@ -15,7 +15,11 @@
           "kind": "bin"
         }
       },
-      "args": ["--config", "~/balls"],
+      "args": [
+        "--config",
+        "~/balls",
+        "/home/alekeagle/10000000000001E000000280E80333CEB6CDB5AE.jpg"
+      ],
       "cwd": "${workspaceFolder}"
     },
     {

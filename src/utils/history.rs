@@ -1,10 +1,10 @@
-use std::{fs::*, str::FromStr};
+use std::fs::File;
+use std::{fs::create_dir_all, str::FromStr};
 use std::path::PathBuf;
-use std::env;
 use std::io::Write;
 use serde::{Deserialize, Serialize};
-use crate::utils::config::{Config};
-use chrono::{Local};
+use crate::utils::config::Config;
+use chrono::Local;
 
 
 // A struct to hold the history of uploads.

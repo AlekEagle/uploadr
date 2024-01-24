@@ -63,9 +63,13 @@ pub struct UploaderRequest {
 /// Struct for body data. Only one can be specified at a time.
 /// TODO: Implement support for more body types other than just MultipartFormData.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Body {
-  /// Multipart form data.
-  pub multipart: Option<HashMap<String, String>>,
+pub enum Body {
+  Raw,
+  MultipartFormData {
+    field: String,
+    filename: Option<String>,
+    mime: Option<String>,
+  },
 }
 
 /// Struct for the response data.
@@ -194,12 +198,10 @@ impl UploaderData {
           map.insert("Authorization".to_owned(), "Client-ID eb13b71463957f7".to_owned());
           map
         },
-        body: Body {
-          multipart: {
-            let mut map = HashMap::new();
-            map.insert("image".to_owned(), "!CONTENT!".to_owned());
-            Some(map)
-          },
+        body: Body::MultipartFormData {
+          field: "image".to_owned(),
+          filename: None,
+          mime: None,
         },
       },
       response: UploaderResponse {
