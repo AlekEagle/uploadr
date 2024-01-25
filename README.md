@@ -16,9 +16,9 @@ Previously written in C++, this is a rewrite in Rust. It's not as feature-comple
     - [x] application/octet-stream
   - [x] Response Parsing
     - [x] JSON
-    - [ ] XML
+    - [x] XML
     - [ ] URL-encoded
-    - [ ] Reg-exp matching
+    - [x] Reg-exp matching
 - [x] Clipboard stuff and things
   - [x] Copy to clipboard
   - [x] Upload from clipboard
@@ -72,18 +72,18 @@ Old:
 {
   "defaultUploader": "string",
   "archive": {
-    "enabled": "bool",
-    "path": "string",
-    "maxCount": "number",
+    "enabled": true,
+    "path": "/dev/null",
+    "maxCount": 1000,
     "histFile": "string"
   },
   "clipboard": {
-    "enabled": "bool"
+    "enabled": true
   },
   "notification": {
     "enabled": "bool",
     "sound": "string",
-    "timeout": "number"
+    "timeout": 5
   }
 }
 ```
@@ -92,20 +92,20 @@ New:
 
 ```json
 {
-  "default_uploader": "string", // Now snake_case, but still compatible with camelCase
+  "default_uploader": "uploader", // Now snake_case
   "archive": {
-    "enabled": "bool",
-    "path": "string",
-    "max": "number" // Renamed to max, but still compatible with maxCount
+    "enabled": true,
+    "path": "/dev/null", // Must be an absolute path
+    "max": 1000 // Renamed to max
     // Hist file is in the same directory as the config file, so it's not necessary to specify it.
   },
   "clipboard": {
-    "enabled": "bool",
-    "read_only": "bool" // New option to disable setting the clipboard
+    "enabled": true,
+    "read_only": false // New option to disable setting the clipboard
   },
   "notification": {
-    "enabled": "bool",
-    "timeout": "number"
+    "enabled": true,
+    "timeout": 5 // Timeout in seconds
     // Sound is not used in the Rust version.
   }
 }
@@ -160,8 +160,8 @@ New:
   },
   "response": {
     "url": "stuff",
-    "manageUrl": "more_stuff",
-    "thumbnailUrl": "the_most_stuff"
+    "manage_url": "more_stuff",
+    "thumbnail_url": "the_most_stuff"
   }
 }
 ```
@@ -196,7 +196,7 @@ Unclosed templates and invalid directives will cause uploadr to panic with an er
   - `response:body`
     - `response:body;json;path` (A.K.A. `json:path`) - Get a value from the response body. It takes a JSON path and returns the value at that path. It must refer to only a single value, and cannot be an array or object.
     - `response:body;xml;path` (A.K.A. `xml:path`) - Get a value from the response body. It takes an XPath and returns the value at that path. It must refer to only a single value, and cannot be an array or object. (untested but might work)
-    - `response:body;flags;regexp;pattern` (A.K.A. `regexp:flags;pattern`) - Get a value from the response body. It takes a regular expression and returns the first match. It must refer to only a single value, and cannot be an array or object. (untested but might work)
+    - `response:body;regexp;pattern` (A.K.A. `regexp:pattern`) - Get a value from the response body. It takes a regular expression and returns the first match. It must refer to only a single value, and cannot be an array or object. (untested but might work)
   - `response:headers;header` - Get a value from the response headers. It takes a header name and returns the value of that header. Case-insensitive.
   - `response:status_code` - Get the status code of the response.
   - `response:url` - Get the final URL of the response. This is useful if the server redirects the request.

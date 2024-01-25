@@ -326,8 +326,7 @@ impl<'a> Templator<'a> {
                 }
               }
               "regex" => {
-                let flag = parameters.get(2).unwrap().as_str();
-                let regex = regex::Regex::new(parameters.get(3).unwrap()).expect("Invalid regex");
+                let regex = regex::Regex::new(parameters.get(2).unwrap()).expect("Invalid regex");
                 let captures = regex.captures(&curlyfry.response.as_ref().unwrap().body).expect("No match");
                 captures.get(1).unwrap().as_str().to_string()
               }
@@ -370,8 +369,7 @@ impl<'a> Templator<'a> {
       // Alias for response:body;regex
       "regex" => {
         let curlyfry = self.curlyfry.expect("Use of regex directive before response is available.");
-        let flag = parameters.get(1).unwrap().as_str();
-        let regex = regex::Regex::new(parameters.get(2).unwrap()).expect("Invalid regex");
+        let regex = regex::Regex::new(parameters.get(1).unwrap()).expect("Invalid regex");
         let captures = regex.captures(&curlyfry.response.as_ref().unwrap().body).expect("No match");
         captures.get(1).unwrap().as_str().to_string()
       }

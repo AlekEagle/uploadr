@@ -17,8 +17,6 @@ pub struct Config {
 /// The data struct.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfigData {
-  // Can be camel case in the config file.
-  #[serde(rename = "defaultUploader")]
   pub default_uploader: String,
   pub notification: Notification,
   pub archive: Archive,
@@ -37,7 +35,6 @@ pub struct Notification {
 pub struct Archive {
   pub enabled: bool,
   pub path: String,
-  #[serde(rename = "maxCount")]
   pub max: u32,
 }
 
