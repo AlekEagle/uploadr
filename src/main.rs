@@ -1,13 +1,15 @@
 mod utils;
+use clap::Parser;
+use notify_rust::Notification;
 use std::path::PathBuf;
-
+use std::process::ExitCode;
+use utils::clippy::Clippy;
 use utils::config::Config;
-use utils::history::HistoryManager;
-use utils::templator::Templator;
 use utils::curlyfries::CurlyFry;
 use utils::file::File;
-use utils::clippy::Clippy;
-use clap::Parser;
+use utils::history::HistoryManager;
+use utils::templator::Templator;
+use webbrowser::open;
 
 #[derive(Parser, Debug)]
 #[command(author = "Alek Evans", version = env!("CARGO_PKG_VERSION"), about = env!("CARGO_PKG_DESCRIPTION"))]
@@ -36,7 +38,7 @@ pub struct Args {
   pub file: Option<String>,
 }
 
-fn main() {
+fn main() -> ExitCode {
   let mut args: Args = Args::parse();
   let config = Config::new(args.config.take(), args.uploader.take());
   let mut templator = Templator::new(&config);
@@ -50,7 +52,7 @@ fn main() {
   // Print history if requested and exit.
   if args.history {
     print_history(&config, history_manager);
-    return;
+    return ExitCode::SUCCESS;
   }
 
   let mut file = match args.file.unwrap_or("-".to_string()).as_str() {
@@ -62,12 +64,12 @@ fn main() {
     file => File::from_path(&PathBuf::from(file)),
   };
 
-  if args.filename.is_some() {
-    file.override_name(args.filename.unwrap());
+  if let Some(filename) = args.filename {
+    file.override_name(filename);
   }
 
-  if args.mime.is_some() {
-    file.override_mime(args.mime.unwrap());
+  if let Some(mime) = args.mime {
+    file.override_mime(mime);
   }
 
   templator.set_file(file.clone());
@@ -77,21 +79,57 @@ fn main() {
   curlyfry.set_method(config.uploader.request.method.clone());
   curlyfry.set_headers(config.uploader.request.headers.clone().into_iter().map(|(k, v)| (k, templator.format(&v))).collect());
   curlyfry.set_file(file.clone());
+  let progress_notification = Notification::new()
+  .appname("Uploadr")
+  .summary("Uploading...")
+  .timeout(0)
+  .body(&format!("Uploading {}...", file.name))
+  .show()
+  .unwrap();
   curlyfry.execute(&config);
   
   templator.set_curlyfry(&curlyfry);
 
   if curlyfry.response.as_ref().unwrap().status_code / 100 == 2 {
+    progress_notification.close();
     println!("Upload successful!");
+    if config.data.notification.enabled {
+      let url = templator.format(&config.uploader.response.url);
+      let manage_url = config.uploader.response.manage_url.as_ref().map(|manage_url| templator.format(manage_url));
+      let timeout = config.data.notification.timeout as i32;
+      // spawn a thread to display the notification
+      std::thread::spawn(move || {
+        let mut notification = Notification::new();
+        notification.appname("Uploadr")
+        .summary("Upload successful!")
+        .body("Click to open in your browser.")
+        .timeout(timeout)
+        .action("open", "Open")
+        .action("default", "Open");
+        if manage_url.is_some() {
+          notification.action("manage", "Manage Upload");
+        }
+        notification.show()
+        .expect("Failed to show notification.")
+        .wait_for_action(|action| {
+          match action {
+            "open" |
+            "default" => {
+              let _ = open(&url);
+            },
+            "manage" => {
+              if let Some(manage_url) = manage_url{
+                open(&manage_url).unwrap();
+              }
+            },
+            _ => {},
+          }
+        });
+      });
+    }
     let url = templator.format(&config.uploader.response.url);
-    let manage_url = match config.uploader.response.manage_url {
-      Some(ref manage_url) => Some(templator.format(manage_url)),
-      None => None,
-    };
-    let thumbnail_url = match config.uploader.response.thumbnail_url {
-      Some(ref thumbnail_url) => Some(templator.format(thumbnail_url)),
-      None => None,
-    };
+    let manage_url = config.uploader.response.manage_url.as_ref().map(|manage_url| templator.format(manage_url));
+    let thumbnail_url = config.uploader.response.thumbnail_url.as_ref().map(|thumbnail_url| templator.format(thumbnail_url));
     if config.data.archive.enabled {
       history_manager.load();
       history_manager.add(&file, url.clone(), manage_url.clone(), thumbnail_url.clone());
@@ -106,9 +144,23 @@ fn main() {
     }
     if config.data.clipboard.enabled {
       clippy.expect("Clipboard is not enabled.").set(url);
+      ExitCode::SUCCESS
+    } else {
+      ExitCode::SUCCESS
     }
   } else {
+    progress_notification.close();
     println!("Upload failed!");
+    println!("Status Code: {}", curlyfry.response.as_ref().unwrap().status_code);
+    println!("Response: {}", curlyfry.response.as_ref().unwrap().body);
+    Notification::new()
+    .appname("Uploadr")
+    .summary("Upload failed!")
+    .timeout(0)
+    .body(&format!("Status Code: {}\nResponse: {}", curlyfry.response.as_ref().unwrap().status_code, curlyfry.response.as_ref().unwrap().body))
+    .show()
+    .unwrap();
+    ExitCode::FAILURE
   }
 }
 

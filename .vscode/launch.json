@@ -15,7 +15,7 @@
           "kind": "bin"
         }
       },
-      "args": ["--config", "~/balls", "@"],
+      "args": ["--config", "~/balls", "-u=imgur", "@"],
       "cwd": "${workspaceFolder}"
     },
     {

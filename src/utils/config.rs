@@ -201,7 +201,7 @@ impl UploaderData {
         },
       },
       response: UploaderResponse {
-        url: "data.link".to_owned(),
+        url: "{json:$.data.link}".to_owned(),
         manage_url: None,
         thumbnail_url: None,
       },

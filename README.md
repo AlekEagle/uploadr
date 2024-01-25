@@ -8,7 +8,7 @@ Previously written in C++, this is a rewrite in Rust. It's not as feature-comple
 
 ## Roadmap
 
-- [ ] Upload stuff to things
+- [x] Upload stuff to things
   - [x] Configurable HTTP request method
   - [x] Configurable HTTP request headers
   - [x] Configurable HTTP request body
@@ -50,12 +50,12 @@ Previously written in C++, this is a rewrite in Rust. It's not as feature-comple
       - [x] Random choice
     - [x] Config related templates
     - [x] Uploader config related templates
-- [ ] Notifications stuff and things
-  - [ ] Upload progress
-  - [ ] Upload complete
-    - [ ] Open URL in browser
-    - [ ] Open management page
+- [x] Notifications stuff and things
+  - [x] Upload progress
+  - [x] Upload complete
+    - [x] Open URL in browser
+    - [x] Open management page
     - [ ] Display upload preview (if applicable)
   - [ ] Upload failed
-- [ ] Upload history stuff and things
+- [x] Upload history stuff and things
 - [ ] GUI stuff and things?!?!?!?!?!? (probably not)
