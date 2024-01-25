@@ -11,6 +11,12 @@ pub struct Response {
   pub body: String,
 }
 
+impl Response {
+  pub fn ok(&self) -> bool {
+    self.status_code / 100 == 2
+  }
+}
+
 pub struct CurlyFry {
   pub easy: Easy,
   pub url: String,

@@ -312,6 +312,25 @@ impl<'a> Templator<'a> {
                   }
                 }
               }
+              "xml" => {
+                let xml = serde_xml_rs::from_str(&curlyfry.response.as_ref().unwrap().body).expect("Invalid XML");
+                let path = JsonPath::parse(parameters.get(2).unwrap()).expect("Invalid XML path");
+                let value = path.query(&xml).exactly_one();
+                match value {
+                  Ok(value) => {
+                    value.as_str().unwrap().to_string()
+                  }
+                  Err(_) => {
+                    panic!("Invalid XML path.");
+                  }
+                }
+              }
+              "regex" => {
+                let flag = parameters.get(2).unwrap().as_str();
+                let regex = regex::Regex::new(parameters.get(3).unwrap()).expect("Invalid regex");
+                let captures = regex.captures(&curlyfry.response.as_ref().unwrap().body).expect("No match");
+                captures.get(1).unwrap().as_str().to_string()
+              }
               _ => panic!("Unknown body type.")
             }
           }
@@ -333,11 +352,37 @@ impl<'a> Templator<'a> {
           }
         }
       }
+      // Alias for response:body;xml
+      "xml" => {
+        let curlyfry = self.curlyfry.expect("Use of xml directive before response is available.");
+        let xml = serde_xml_rs::from_str(&curlyfry.response.as_ref().unwrap().body).expect("Invalid XML");
+        let path = JsonPath::parse(parameters.first().unwrap()).expect("Invalid XML path");
+        let value = path.query(&xml).exactly_one();
+        match value {
+          Ok(value) => {
+            value.as_str().unwrap().to_string()
+          }
+          Err(_) => {
+            panic!("Invalid XML path.");
+          }
+        }
+      }
+      // Alias for response:body;regex
+      "regex" => {
+        let curlyfry = self.curlyfry.expect("Use of regex directive before response is available.");
+        let flag = parameters.get(1).unwrap().as_str();
+        let regex = regex::Regex::new(parameters.get(2).unwrap()).expect("Invalid regex");
+        let captures = regex.captures(&curlyfry.response.as_ref().unwrap().body).expect("No match");
+        captures.get(1).unwrap().as_str().to_string()
+      }
       "file" => {
         let file = self.file.as_ref().expect("Use of file directive before file is available.");
         match parameters.first().unwrap().as_str() {
           "name" => {
             file.name.clone()
+          }
+          "ext" => {
+            file.ext.clone()
           }
           "mime" => {
             file.mime.clone()

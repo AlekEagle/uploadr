@@ -51,8 +51,7 @@ fn main() -> ExitCode {
 
   // Print history if requested and exit.
   if args.history {
-    print_history(&config, history_manager);
-    return ExitCode::SUCCESS;
+    return print_history(&config, history_manager);
   }
 
   let mut file = match args.file.unwrap_or("-".to_string()).as_str() {
@@ -90,13 +89,13 @@ fn main() -> ExitCode {
   
   templator.set_curlyfry(&curlyfry);
 
-  if curlyfry.response.as_ref().unwrap().status_code / 100 == 2 {
+  if curlyfry.response.as_ref().unwrap().ok() {
     progress_notification.close();
     println!("Upload successful!");
     if config.data.notification.enabled {
       let url = templator.format(&config.uploader.response.url);
       let manage_url = config.uploader.response.manage_url.as_ref().map(|manage_url| templator.format(manage_url));
-      let timeout = config.data.notification.timeout as i32;
+      let timeout = config.data.notification.timeout as i32 * 1000;
       // spawn a thread to display the notification
       std::thread::spawn(move || {
         let mut notification = Notification::new();
@@ -142,10 +141,11 @@ fn main() -> ExitCode {
     if thumbnail_url.is_some() {
       println!("Thumbnail URL: {}", thumbnail_url.unwrap());
     }
-    if config.data.clipboard.enabled {
+    if !config.data.clipboard.read_only {
       clippy.expect("Clipboard is not enabled.").set(url);
       ExitCode::SUCCESS
     } else {
+      println!("Clipboard is read-only, not copying URL to clipboard.");
       ExitCode::SUCCESS
     }
   } else {
@@ -164,17 +164,20 @@ fn main() -> ExitCode {
   }
 }
 
-fn print_history(config: &Config, mut history_manager: HistoryManager) {
+fn print_history(config: &Config, mut history_manager: HistoryManager) -> ExitCode {
   if config.data.archive.enabled {
     if history_manager.load() {
       let history = history_manager.list();
       println!("File Name, URL, Manage URL, Thumbnail URL");
       println!("----------------");
       println!("{history}");
+      ExitCode::SUCCESS
     } else {
       println!("No upload history found.");
+      ExitCode::FAILURE
     }
   } else {
     println!("Upload history is disabled.");
+    ExitCode::FAILURE
   }
 }

@@ -17,6 +17,8 @@ pub struct Config {
 /// The data struct.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfigData {
+  // Can be camel case in the config file.
+  #[serde(rename = "defaultUploader")]
   pub default_uploader: String,
   pub notification: Notification,
   pub archive: Archive,
@@ -35,6 +37,8 @@ pub struct Notification {
 pub struct Archive {
   pub enabled: bool,
   pub path: String,
+  #[serde(rename = "maxCount")]
+  pub max: u32,
 }
 
 /// Clipboard config struct.
@@ -42,7 +46,6 @@ pub struct Archive {
 pub struct Clipboard {
   pub enabled: bool,
   pub read_only: bool,
-  pub text_only: bool,
 }
 
 /// Struct for specific uploaders.
@@ -62,8 +65,8 @@ pub struct UploaderRequest {
 }
 
 /// Struct for body data. Only one can be specified at a time.
-/// TODO: Implement support for more body types other than just MultipartFormData.
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "type")]
 pub enum Body {
   Raw,
   MultipartFormData {
@@ -134,16 +137,16 @@ impl ConfigData {
       default_uploader: "imgur".to_owned(),
       notification: Notification {
         enabled: true,
-        timeout: 5000,
+        timeout: 5,
       },
       archive: Archive {
         enabled: true,
         path: PathBuf::from_iter(&[env::var("HOME").unwrap(), "Pictures".to_owned(), "uploadr".to_owned()]).to_str().unwrap().to_string(),
+        max: 100,
       },
       clipboard: Clipboard {
         enabled: true,
         read_only: false,
-        text_only: false,
       },
     }
   }

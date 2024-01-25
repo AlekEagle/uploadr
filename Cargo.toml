@@ -26,3 +26,4 @@ uuid = { version = "1.7.0", features = ["v4"] }
 atty = "0.2.14"
 image = "0.24.8"
 webbrowser = "0.8.12"
+regex = "1.10.3"

@@ -19,6 +19,7 @@ pub struct History {
 pub struct HistoryManager {
   pub history: Vec<History>,
   pub history_path: PathBuf,
+  pub max_history: u32,
 }
 
 impl HistoryManager {
@@ -32,6 +33,7 @@ impl HistoryManager {
     HistoryManager {
       history: Vec::new(),
       history_path,
+      max_history: config.data.archive.max,
     }
   }
 
@@ -58,9 +60,23 @@ impl HistoryManager {
     writer.flush().unwrap();
   }
 
+  // Delete oldest history record.
+  pub fn delete_oldest(&mut self) {
+    if !self.history.is_empty() {
+      let file = self.history.remove(0);
+      let file_path = self.history_path.clone().join("uploads").join(file.file_name);
+      std::fs::remove_file(file_path).unwrap();
+      self.save();
+    }
+  }
+
   // Take a file buffer, pertinent URLs and commit them to the history.
   pub fn add(&mut self, file_buf: &super::file::File, url: String, manage_url: Option<String>, thumbnail_url: Option<String>) {
-    
+    // Check if we have reached the maximum number of history records.
+    if self.history.len() >= self.max_history as usize{
+      // Remove the oldest record.
+      self.delete_oldest();
+    }
     // Get the current time. This will be used as the filename.
     let time_str = Local::now().format("%Y-%m-%d %H-%M-%S").to_string();
     let file_name = format!("{}.{}", time_str, file_buf.ext);
