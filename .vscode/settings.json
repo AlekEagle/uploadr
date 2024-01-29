@@ -1,0 +1,17 @@
+{
+  "rust-analyzer.showUnlinkedFileNotification": false,
+  "cSpell.words": [
+    "appname",
+    "arboard",
+    "chrono",
+    "cliargs",
+    "curlyfries",
+    "httppost",
+    "serde",
+    "splitn",
+    "templator",
+    "uploaders",
+    "useragent",
+    "webbrowser"
+  ]
+}
