@@ -39,6 +39,7 @@ pub struct Args {
 }
 
 fn main() -> ExitCode {
+  env_logger::init();
   let mut args: Args = Args::parse();
   let config = Config::new(args.config.take(), args.uploader.take());
   let mut templator = Templator::new(&config);
