@@ -1,7 +1,7 @@
 [package]
 name = "uploadr"
 description = "Uploadr is a command line tool to upload files to the cloud."
-version = "2.0.2"
+version = "2.0.3"
 edition = "2021"
 
 

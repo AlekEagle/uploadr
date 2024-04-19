@@ -15,7 +15,12 @@
           "kind": "bin"
         }
       },
-      "args": ["--config", "~/balls", "-u=imgur", "@"],
+      "args": [
+        "--config",
+        "~/balls",
+        "-u=cumulonimbus",
+        "/home/alekeagle/2102003563.png"
+      ],
       "cwd": "${workspaceFolder}"
     },
     {

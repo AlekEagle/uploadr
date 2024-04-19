@@ -21,6 +21,11 @@ impl File {
       Some(infer) => infer.extension().to_owned(),
       None => if mime == "text/plain" { "txt".to_owned() } else { "bin".to_owned() },
     };
+    // If the name has an extension, and it is the same extension as the inferred extension, remove the extension.
+    let name = match PathBuf::from(&name).extension() {
+      Some(ext) => if ext.to_str().unwrap() == ext { PathBuf::from(&name).file_stem().unwrap().to_str().unwrap().to_owned() } else { name },
+      None => name,
+    };
     File {
       name: format!("{}.{}", name, ext),
       buffer: buf.to_vec(),
@@ -36,6 +41,11 @@ impl File {
     }
     let mut buf = Vec::new();
     std::io::stdin().read_to_end(buf.as_mut()).unwrap();
+    // If the buffer is empty, exit.
+    if buf.is_empty() {
+      println!("No data was read from stdin.");
+      std::process::exit(1);
+    }
     File::new(&buf, "stdin".to_owned())
   }
 
