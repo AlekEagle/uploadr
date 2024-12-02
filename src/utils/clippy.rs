@@ -27,7 +27,7 @@ impl Clippy {
         // Create a writer to write the image data to the buffer.
         let mut writer = std::io::Cursor::new(&mut buf);
         // Write the image data to the buffer.
-        img.write_to(&mut writer, image::ImageOutputFormat::Png).unwrap();
+        img.write_to(&mut writer, image::ImageFormat::Png).unwrap();
         // Create a new file from the buffer.
         Ok(File::new(&buf, "Clipboard".to_owned()))
       },
