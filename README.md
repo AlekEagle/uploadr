@@ -97,7 +97,7 @@ New:
     "enabled": true,
     "path": "/dev/null", // Must be an absolute path
     "max": 1000 // Renamed to max
-    // Hist file is in the same directory as the config file, so it's not necessary to specify it.
+    // history.csv and the uploads/ folder are stored inside this path, so it's not necessary to specify a history file.
   },
   "clipboard": {
     "enabled": true,
@@ -170,23 +170,26 @@ New:
 
 Uploadr supports templating in the uploader configuration files. This allows you to use variables in your configuration that will be replaced the appropriate values at runtime. Formatted as `{ directive:parameter;...parameters }`, templates can also be nested inside each other, allowing for complex configurations.
 
-Unclosed templates and invalid directives will cause uploadr to panic with an error message.
+Unclosed templates and invalid directives will cause uploadr to exit with an error message.
+
+`:` separates the directive name from its parameters, and `;` separates parameters. Any `:` after the first one is part of the parameter, so values like `https://example.com:8080` work as-is. To use `{`, `}`, `;`, `:` or `\` literally, escape them with a backslash (e.g. `\{`, `\;`, `\\`). A backslash before any other character is kept as-is, so regex classes like `\d` don't need escaping. The output of a nested template is used literally, it is not templated again.
+
+Names, numbers, and paths in parameters have surrounding whitespace trimmed, but choices, alphabets, regex patterns, and `env` default values are used exactly as written.
 
 ### Directives
 
 - Configuration related directives
+  - `config:path` - Get a value from the primary configuration file. It takes a JSON path and returns the value at that path. It must refer to only a single value. Strings are returned without quotes.
+  - `uploader:path` - Get a value from the uploader configuration file. It takes a JSON path and returns the value at that path. It must refer to only a single value. Strings are returned without quotes.
 
-  - `config:path` - Get a value from the primary configuration file. It takes a JSON path and returns the value at that path. It must refer to only a single value, and cannot be an array or object.
-  - `uploader:path` - Get a value from the uploader configuration file. It takes a JSON path and returns the value at that path. It must refer to only a single value, and cannot be an array or object.
-
-- `env:parameter` - Get an environment variable. It takes a single parameter, which is the name of the environment variable to get. If the environment variable is not set, uploadr will panic with an error message.
+- `env:name;default` - Get an environment variable. The first parameter is the name of the environment variable to get. `default` is optional, and is used if the variable is not set. If the environment variable is not set and there is no default, uploadr will exit with an error message.
 
 - `random:type;...parameters`
-  - `random:int;min;max` - Get a random integer between `min` and `max` (inclusive). `min` and `max` must be integers.
-  - `random:float;min;max` - Get a random float between `min` and `max` (inclusive). `min` and `max` must be floats.
-  - `random:choice;...choices` - Get a random choice from the provided choices. Choices must be separated by semicolons.
+  - `random:int;min;max` - Get a random integer between `min` and `max` (inclusive). `min` and `max` must be integers (defaulting to 1 and 100), and `min` can't be greater than `max`.
+  - `random:float;min;max` - Get a random float from `min` (inclusive) up to `max` (exclusive), or exactly `min` if they're equal. `min` and `max` must be floats (defaulting to 1 and 100), and `min` can't be greater than `max`.
+  - `random:choice;...choices` - Get a random choice from the provided choices. Choices must be separated by semicolons, and at least one is required.
   - `random:uuid` - Get a random v4 UUID.
-  - `random:string;length;alphabet` - Get a random string of the specified length. `length` must be an integer. `alphabet` is optional, and if not provided, defaults to `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`. It can be any string of characters, and can be any length.
+  - `random:string;length;alphabet` - Get a random string of the specified length. `length` must be an integer. `alphabet` is optional, and if not provided, defaults to `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`. It can be any string of characters (including Unicode), and can be any non-zero length.
 - File related directives
   - `file:name` - Get the name of the file being uploaded.
   - `file:ext` - Get the extension of the file being uploaded.
@@ -194,9 +197,9 @@ Unclosed templates and invalid directives will cause uploadr to panic with an er
   - `file:mime` - Get the MIME type of the file being uploaded.
 - Response related directives (these are only available in the `response` section of the uploader config)
   - `response:body`
-    - `response:body;json;path` (A.K.A. `json:path`) - Get a value from the response body. It takes a JSON path and returns the value at that path. It must refer to only a single value, and cannot be an array or object.
-    - `response:body;xml;path` (A.K.A. `xml:path`) - Get a value from the response body. It takes an XPath and returns the value at that path. It must refer to only a single value, and cannot be an array or object. (untested but might work)
-    - `response:body;regexp;pattern` (A.K.A. `regexp:pattern`) - Get a value from the response body. It takes a regular expression and returns the first match. It must refer to only a single value, and cannot be an array or object. (untested but might work)
+    - `response:body;json;path` (A.K.A. `json:path`) - Get a value from the response body. It takes a JSON path and returns the value at that path. It must refer to only a single value. Strings are returned without quotes.
+    - `response:body;xml;path` (A.K.A. `xml:path`) - Get a value from the response body. The XML is converted to JSON first, so it takes a JSON path (not an XPath) and returns the value at that path. It must refer to only a single value. (untested but might work)
+    - `response:body;regex;pattern` (A.K.A. `regex:pattern`) - Get a value from the response body. It takes a regular expression and returns the first capture group of the first match, or the whole match if the pattern has no groups. If the pattern doesn't match, uploadr exits with an error. Escape `{`, `}` and `;` in patterns (e.g. `\d\{3\}`).
   - `response:headers;header` - Get a value from the response headers. It takes a header name and returns the value of that header. Case-insensitive.
   - `response:status_code` - Get the status code of the response.
   - `response:url` - Get the final URL of the response. This is useful if the server redirects the request.

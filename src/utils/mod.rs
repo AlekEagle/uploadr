@@ -12,3 +12,5 @@ pub mod templator;
 pub mod file;
 // Clipboard logic module.
 pub mod clippy;
+// Private (user only) file and directory creation module.
+pub mod private_fs;
